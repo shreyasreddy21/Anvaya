@@ -1,0 +1,144 @@
+.mirror-game-container {
+  background-size: cover;
+  background-position: center;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Comic Sans MS', 'Arial Rounded MT Bold', cursive;
+  background: white;
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  max-width: 650px;
+  margin: 0 auto;
+}
+
+.mirror-game-title {
+  font-size: 36px;
+  color: white;
+  background-color: #f97316;
+  padding: 10px 30px;
+  border-radius: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  margin-bottom: 20px;
+}
+
+.mirror-game-board {
+  background-color: #fef3c7;
+  border: 5px solid #d97706;
+  border-radius: 30px;
+  padding: 40px;
+  text-align: center;
+  width: 90%;
+  max-width: 400px;
+  position: static;
+}
+
+.mirror-game-question {
+  font-size: 60px;
+  color: #1f2937;
+  margin-bottom: 30px;
+  font-weight: bold;
+  padding: 10px;
+  border:3px solid rgb(244, 220, 84);
+  background-color: #fffbb0;
+  border-radius: 30px;
+}
+
+.mirror-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.mirror-option {
+  font-size: 28px;
+  padding: 15px;
+  background-color: #fde68a;
+  border: 3px solid #fbbf24;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.mirror-option:hover:not(:disabled) {
+  background-color: #fcd34d;
+  transform: scale(1.05);
+}
+
+.mirror-option.selected {
+  background-color: #facc15;
+  border-color: #eab308;
+}
+
+.mirror-feedback {
+  font-size: 22px;
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+.correct {
+  color: green;
+}
+
+.incorrect {
+  color: red;
+}
+
+.mirror-next-button {
+  background-color: #34d399;
+  color: white;
+  font-size: 20px;
+  padding: 10px 25px;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.mirror-next-button:hover {
+  background-color: #10b981;
+  transform: scale(1.05);
+}
+.mirror-level-selector {
+  margin-bottom: 20px;
+  font-size: 16px;
+  text-align: center;
+}
+
+.mirror-level-selector select {
+  padding: 5px 10px;
+  font-size: 16px;
+  margin-left: 10px;
+}
+
+.mirror-score {
+  text-align: center;
+  font-size: 18px;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.mirror-final-score {
+  text-align: center;
+  font-size: 20px;
+  margin-top: 30px;
+}
+
+.mirror-reset-button {
+  margin-top: 15px;
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  background-color: #4caf50;
+  color: white;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.mirror-reset-button:hover {
+  background-color: #45a049;
+}

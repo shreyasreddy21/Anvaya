@@ -1,0 +1,181 @@
+.games-page-container {
+  text-align: center;
+  padding:  0           px;
+  /* background: url("C:\Users\preet\OneDrive\Documents\Project\JOYVERSE\frontend\joyverse\public\images\gamesback2.jpg") no-repeat center center/cover; */
+  min-height: 100vh;
+  width: 100vw;  
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap : 100px;
+}
+.header-container{
+  background-color: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(10px); 
+  /* box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.2); */
+  
+  align-self: stretch;
+  position: relative;
+  text-shadow: 0 6.5px 5px rgba(0, 0, 0, 0.25);
+  margin: 0           ;
+  height:250 px;
+  font-size: inherit;
+  font-weight: 700;
+  font-family: inherit;
+  display: inline-block;
+  justify-content: center;
+}
+.games-page-title {
+  font-size: 5rem;
+  color: #070707;
+  text-shadow: 3px 3px 8px rgba(0, 0, 0,  0.2);
+  margin-bottom: 10px;
+}
+
+/* Subtitle */
+.games-page-subtitle {
+  font-size: 2rem;
+  color: #1b1a1a;
+  margin-bottom: 30px;
+}
+
+/* Game List Styling */
+.games-page-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding-left: 30px;
+  padding-right: 30px;
+  gap: 30px;
+}
+
+/* Individual Game Card */
+.games-page-card {
+  background: #fff;
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  cursor: pointer;
+  width: 260px;
+  text-align: center;
+  padding-right: 40px;
+  font-family: var(--font-opendyslexic);
+  display: flex;
+  flex-direction: column;
+  align-items: center ;
+}
+
+/* Hover Effects */
+.games-page-card:hover {
+  transform: scale(1.08);
+  box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Game Titles */
+.games-page-card h2 {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+/* Game Descriptions */
+.games-page-card p {
+  font-size: 1.1rem;
+  color: #444;
+}
+
+/* Unique Colors for Each Game */
+.games-page-word-game {
+  background: #fbc4b3;
+  /* border: 3px solid #ff5722; */
+  backdrop-filter: blur(10px); 
+  -webkit-backdrop-filter: blur(10px); 
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.games-page-word-game:hover{
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.games-page-math-game {
+  background: #c8e6c9;
+  backdrop-filter: blur(10px); 
+  -webkit-backdrop-filter: blur(10px); 
+  background-color: rgba(255, 255, 255, 0.35);
+}
+.games-page-math-game:hover{
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.games-page-quiz-game {
+  background: #bbdefb;
+  /* border: 3px solid #2196f3; */
+  backdrop-filter: blur(10px); 
+  -webkit-backdrop-filter: blur(10px); 
+  background-color: rgba(255, 255, 255, 0.35);
+  
+}
+.games-page-quiz-game:hover{
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.games-page-syllable-game {
+  background: #f5bbe4;
+  /* border: 3px solid #f406ac; */
+  backdrop-filter: blur(10px); 
+  -webkit-backdrop-filter: blur(10px); 
+  background-color: rgba(255, 255, 255, 0.35);
+}
+.games-page-syllable-game:hover{
+  background-color: rgba(255, 255, 255, 0.5);
+}
+.games-page-shapememory-game {
+  background: #f7f7c1;
+  /* border: 3px solid #fafa01; */
+  backdrop-filter: blur(10px); 
+  -webkit-backdrop-filter: blur(10px); 
+  background-color: rgba(255, 255, 255, 0.05);
+}
+.games-page-shapememory-game:hover{
+  background-color: rgba(255, 255, 255, 0.5);
+}
+.games-page-letterbridge-game {
+  background: #d8ace9;
+  /* border: 3px solid #bb01ff; */
+  backdrop-filter: blur(10px); 
+  -webkit-backdrop-filter: blur(10px); 
+  background-color: rgba(255, 255, 255, 0.05);
+}
+.games-page-letterbridge-game:hover{
+  background-color: rgba(255, 255, 255, 0.5);
+}
+.games-page-mirrorword-game {
+  background: #f8dbdb;
+  /* border: 3px solid #ff0101; */
+  backdrop-filter: blur(10px); 
+  -webkit-backdrop-filter: blur(10px); 
+  background-color: rgba(255, 255, 255, 0.05);
+}
+.games-page-mirrorword-game:hover{
+  background-color: rgba(255, 255, 255, 0.5);
+}
+.game-icon {
+  width: 210px;
+  height: 150px;
+  margin-bottom: 25px;
+  /* magin-top: 10px; */
+  border-radius: 15%; 
+  /* object-fit: contain; */
+  /* animation: pop 2s infinite; */
+}
+
+/* Optional fun animation */
+/* @keyframes pop {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+} */

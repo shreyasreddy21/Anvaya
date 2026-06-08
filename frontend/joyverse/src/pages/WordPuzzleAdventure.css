@@ -1,0 +1,119 @@
+body, .game-card {
+  font-family: var(--font-opendyslexic);
+}
+
+.quiz-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.game-card {
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+}
+
+.game-title {
+  font-size: 28px;
+  color: var(--text-color, #333);
+}
+
+.game-text {
+  font-size: 18px;
+  color: var(--text-color, #333);
+  margin: 10px 0;
+}
+
+.emotion-text {
+  font-weight: bold;
+}
+
+.game-button {
+  background: var(--button-bg, #007bff);
+  color: var(--button-text, #fff);
+  border: none;
+  padding: 10px 20px;
+  margin: 5px;
+  font-size: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.game-button:hover {
+  background: var(--button-hover-bg, #0056b3);
+}
+
+.quiz-option-image {
+  width: 400px;
+  height: auto;
+  margin: 20px 0;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.word-slot-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.word-slot {
+  width: 40px;
+  height: 40px;
+  border: 2px solid #ccc;
+  border-radius: 6px;
+  font-size: 24px;
+  line-height: 40px;
+  text-align: center;
+  background: var(--card-color, #fff);
+  cursor: pointer;
+}
+
+.word-slot.filled {
+  font-weight: bold;
+}
+
+.word-letters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin: 15px 0;
+}
+
+.quiz-option-btn {
+  font-size: 18px;
+  padding: 10px 15px;
+  background: var(--card-color, #fff);
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--text-color, #333);
+}
+
+.quiz-option-btn:hover {
+  background: #f2f2f2;
+}
+
+.difficulty-selector {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.game-score {
+  font-size: 20px;
+  font-weight: bold;
+  color: var(--score-color, #28a745);
+}

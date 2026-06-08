@@ -1,0 +1,98 @@
+/* SuperAdminDashboard.css */
+
+.superadmin-dashboard-container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 40px 20px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f9f9f9;
+}
+
+.superadmin-dashboard-title {
+  font-size: 2rem;
+  text-align: center;
+  color: #333;
+  margin-bottom: 30px;
+}
+
+.superadmin-form-button {
+  background-color: beige;
+  color: black;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s ease;
+  margin-bottom: 20px;
+}
+
+.superadmin-form-button:hover {
+  background-color: #e3e4d9;
+}
+
+.superadmin-form-button.cancel {
+  background-color: #f44336;
+  margin-left: 10px;
+}
+
+.superadmin-form-button.cancel:hover {
+  background-color: #d32f2f;
+}
+
+.superadmin-form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 500px;
+  margin: 0 auto 30px auto;
+  background-color: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.superadmin-form-input {
+  padding: 10px 14px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.superadmin-section-title {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  color: #444;
+}
+
+.superadmin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.superadmin-table th,
+.superadmin-table td {
+  padding: 14px 20px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.superadmin-table th {
+  background-color: beige;
+  color: black;
+  font-weight: 600;
+}
+
+.superadmin-child-list {
+  list-style-type: disc;
+  padding-left: 20px;
+  margin: 0;
+}
+
+.superadmin-child-list li {
+  margin: 4px 0;
+}

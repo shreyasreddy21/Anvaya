@@ -1,0 +1,54 @@
+@font-face {
+  font-family: "OpenDyslexic";
+  src: url("/public/OpenDyslexic-Regular.otf");
+  font-weight: 400;
+}
+@font-face {
+  font-family: "OpenDyslexic";
+  src: url("/public/OpenDyslexic-Bold.otf");
+  font-weight: 700;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background-color: var(--color-beige);
+  line-height: normal;
+}
+
+:root {
+  --color-lightpink: #f7a0a0;
+  --color-royalblue: #7981fa;
+  --color-khaki: #f8f09f;
+  --color-peachpuff-200: #f9d2af;
+  --color-peachpuff-100: #ffdab9;
+  --color-peachpuff: #ffdab9;
+  --color-darkseagreen: #afe9b8;
+  --color-gray: rgba(0, 0, 0, 0.2);
+  --color-black: #000;
+  --color-cornflowerblue: #96adfc;
+  --color-blue: #96adfc;
+  --color-beige: #fefee7;
+  --color-darkslategray: #333;
+  --color-tan: #e6c2a1;
+  --color-snow: #fffbfb;
+  --color-gainsboro: #dadada;
+
+  --gap-16: 21px;
+
+  --padding-10: 13px;
+  --padding-12: 16px;
+  --padding-14: 18px;
+  --padding-20: 26px;
+
+  --br-30: 39px;
+  --br-60: 78px;
+
+  --font-opendyslexic: OpenDyslexic;
+
+  --font-size-19: 25px;
+  --font-size-24: 31px;
+  --font-size-32: 42px;
+}

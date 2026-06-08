@@ -1,0 +1,258 @@
+import React, { useState, useEffect } from "react";
+import confetti from "canvas-confetti";
+import "./WordPuzzleAdventure.css";
+import useEmotionDetection from "../hooks/useEmotionDetection";
+import useGameSessionLogger from "../hooks/useGameSessionLogger";
+const WordPuzzleAdventure = () => {
+  const { emotion, videoRef, canvasRef } = useEmotionDetection();
+  const [difficulty, setDifficulty] = useState("easy");
+  const [shuffledWords, setShuffledWords] = useState([]);
+  const [allFetchedWords, setAllFetchedWords] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [selectedLetters, setSelectedLetters] = useState([]);
+  const [shuffledLetters, setShuffledLetters] = useState([]);
+  const [hintVisible, setHintVisible] = useState(false);
+  const [score, setScore] = useState(0);
+  const [gameCompleted, setGameCompleted] = useState(false);
+  const [feedback, setFeedback] = useState("");
+  const username = localStorage.getItem("username");
+  const { endSession } = useGameSessionLogger({
+  username,
+  difficulty,
+  expression: emotion,
+  score,
+});
+  useEffect(() => {
+    fetchQuestions(difficulty);
+  }, [difficulty]);
+
+  useEffect(() => {
+    if (gameCompleted) {
+    confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } });
+
+    (async () => {
+      await endSession(score); 
+    })();
+  }
+}, [gameCompleted]);
+
+  useEffect(() => {
+    document.body.style.overflow = "auto";
+    return () => {
+      document.body.style.overflow = "hidden";
+    };
+  }, []);
+
+  const fetchQuestions = async (level) => {
+    try {
+      const response = await fetch(`http://localhost:4000/api/wordQuestions/${level}`);
+      const data = await response.json();
+      if (data.length === 0) {
+        alert("No questions found for this difficulty!");
+        setShuffledWords([]);
+        return;
+      }
+      setAllFetchedWords(data);
+      initializeGame(data);
+    } catch (error) {
+      console.error("Failed to fetch questions:", error);
+    }
+  };
+
+  const shuffleArray = (array) => {
+    let shuffled = [...array];
+    let attempts = 0;
+    while (shuffled.join("") === array.join("") && attempts < 10) {
+      shuffled = [...array].sort(() => Math.random() - 0.5);
+      attempts++;
+    }
+    return shuffled;
+  };
+
+  const initializeGame = (questions) => {
+    const allWords = shuffleArray(questions);
+    const levelWords = allWords.slice(0, 5);
+    setShuffledWords(levelWords);
+    setCurrentIndex(0);
+    setSelectedLetters(Array(levelWords[0].word.length).fill(""));
+    setShuffledLetters(shuffleArray([...levelWords[0].word]));
+    setScore(0);
+    setHintVisible(false);
+    setGameCompleted(false);
+    setFeedback("");
+  };
+
+  const handleLetterClick = (letter, index) => {
+    if (!letter) return;
+    const newSelection = [...selectedLetters];
+    const emptyIndex = newSelection.findIndex((char) => char === "");
+    if (emptyIndex === -1) return;
+    newSelection[emptyIndex] = letter;
+    setSelectedLetters(newSelection);
+    const updatedShuffled = [...shuffledLetters];
+    updatedShuffled[index] = null;
+    setShuffledLetters(updatedShuffled);
+
+    const formedWord = newSelection.join("");
+    if (!newSelection.includes("")) {
+      const correctWord = shuffledWords[currentIndex].word;
+      if (formedWord === correctWord) {
+        setFeedback("Correct! 🎉");
+        setScore(score + 20);
+        setTimeout(() => {
+          setFeedback("");
+          nextWord();
+        }, 1500);
+      } else {
+        setFeedback("Oops! That's incorrect. ❌");
+        setTimeout(() => {
+          setFeedback("");
+          nextWord();
+        }, 1500);
+      }
+    }
+  };
+
+  const nextWord = () => {
+    if (currentIndex + 1 >= shuffledWords.length) {
+      setGameCompleted(true);
+    } else {
+      const newIndex = currentIndex + 1;
+      const nextWord = shuffledWords[newIndex].word;
+      setCurrentIndex(newIndex);
+      setSelectedLetters(Array(nextWord.length).fill(""));
+      setShuffledLetters(shuffleArray([...nextWord]));
+      setHintVisible(false);
+    }
+  };
+
+  const handleAnswerClick = (index) => {
+    const letterToRemove = selectedLetters[index];
+    if (letterToRemove !== "") {
+      const newSelection = [...selectedLetters];
+      newSelection[index] = "";
+      setSelectedLetters(newSelection);
+      const restored = [...shuffledLetters];
+      for (let i = 0; i < restored.length; i++) {
+        if (restored[i] === null) {
+          restored[i] = letterToRemove;
+          break;
+        }
+      }
+      setShuffledLetters(restored);
+    }
+  };
+
+  const handleReplay = () => {
+    initializeGame(shuffleArray(allFetchedWords));
+  };
+
+  const currentWordObj = shuffledWords[currentIndex] || {};
+  const getEmotionStyles = (emotion) => {
+  switch (emotion) {
+    case "Happy":
+      return { backgroundColor: "#F8FD89", color: "#333333" }; 
+    case "Sad":
+      return { backgroundColor: "#D8FAD2", color: "#3B2F2F" }; 
+    case "Angry":
+      return { backgroundColor: "#A5F7E1", color: "#223344" }; 
+    case "Surprise":
+      return { backgroundColor: "#FFDAB9", color: "#4B0082" }; 
+    case "Neutral":
+    default:
+      return { backgroundColor: "#F9F9F3", color: "#2C2C2C" }; 
+  }
+};
+  return (
+    <div className="quiz-container">
+      <div className="game-card" style={{
+    backgroundColor: getEmotionStyles(emotion).backgroundColor,
+    color: getEmotionStyles(emotion).color,
+    '--text-color': getEmotionStyles(emotion).color,
+  }}>
+        <h2 className="game-title">Word Puzzle Adventure</h2>
+        <p className="game-text emotion-text">Detected Emotion: {emotion}</p>
+
+        <div className="difficulty-selector">
+          {["easy", "medium", "hard"].map((level) => (
+            <button
+              key={level}
+              className="game-button"
+              onClick={() => setDifficulty(level)}
+            >
+              {level.charAt(0).toUpperCase() + level.slice(1)}
+            </button>
+          ))}
+        </div>
+
+        <p className="game-text">Score: {score}</p>
+
+        {gameCompleted ? (
+          <div className="game-score">
+            <p className="game-text">You completed the game! 🎉</p>
+            <p className="game-text">Final Score: {score}</p>
+            <button className="game-button" onClick={handleReplay}>
+              Play Again
+            </button>
+          </div>
+        ) : (
+          <>
+            <img
+              src={currentWordObj.image}
+              alt="word"
+              className="quiz-option-image"style={{
+    width: "200px",
+    height: "200px",
+    objectFit: "contain",
+    borderRadius: "12px",
+    margin: "10px auto"
+  }}
+            />
+            <div className="word-slot-container">
+              {selectedLetters.map((letter, index) => (
+                <div
+                  key={index}
+                  className={`word-slot ${letter ? "filled" : ""}`}
+                  onClick={() => handleAnswerClick(index)}
+                >
+                  {letter}
+                </div>
+              ))}
+            </div>
+            <div className="word-letters">
+              {shuffledLetters.map((letter, index) => (
+                <button
+                  key={index}
+                  className="quiz-option-btn"
+                  onClick={() => handleLetterClick(letter, index)}
+                  disabled={!letter}
+                  style={{ visibility: letter ? "visible" : "hidden" }}
+                >
+                  {letter}
+                </button>
+              ))}
+            </div>
+            <div className="difficulty-selector">
+              <button className="game-button" onClick={() => setHintVisible(true)}>
+                Show Hint
+              </button>
+              <button className="game-button" onClick={nextWord}>
+                Skip
+              </button>
+            </div>
+            {hintVisible && (
+              <p className="game-text">{currentWordObj.hint}</p>
+            )}
+            {feedback && (
+              <p className="game-text">{feedback}</p>
+            )}
+          </>
+        )}
+        <video ref={videoRef} autoPlay style={{ display: "none" }} />
+        <canvas ref={canvasRef} width={640} height={480} style={{ display: "none" }} />
+      </div>
+    </div>
+  );
+};
+
+export default WordPuzzleAdventure;

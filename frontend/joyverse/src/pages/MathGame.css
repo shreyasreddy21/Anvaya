@@ -1,0 +1,130 @@
+.math-game-container {
+  text-align: center;
+  padding: 20px;
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  min-height: 100vh;
+  color: #333;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  max-width: 650px;
+  margin: 0 auto;
+ 
+}
+
+.math-game-title {
+  padding-top: 150px;
+  font-size: 40px;
+  color: #560068;
+}
+
+.math-game-score {
+  padding-top: 10px;
+  font-size: 22px;
+  font-weight: bold;
+  color: #4caf50;
+}
+
+.math-game-question-count {
+  padding-top: 10px;
+  font-size: 20px;
+  color: #007bff;
+}
+
+.game-over-container {
+  text-align: center;
+  /* background-color: #fff; */
+  padding: 10px;
+  border-radius: 15px;
+  /* box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); */
+}
+
+.game-over-title {
+  padding: 10px;
+  font-size: 32px;
+  color: #ff4757;
+}
+
+.game-over-score {
+  padding: 10px;
+  font-size: 26px;
+  color: #2f3542;
+}
+
+.game-over-message {
+  padding: 10px;
+  font-size: 22px;
+  color: #2f3542;
+  font-weight: bold;
+}
+
+.play-again-button {
+  background-color: #ff6b6b;
+  color: #fff;
+  font-size: 26px;
+  padding: 12px 24px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+.play-again-button:hover {
+  background-color: #e74c3c;
+}
+
+.question-container {
+  /* background-color: #fff; */
+  padding: 20px;
+  border-radius: 15px;
+  display: inline-block;
+  /* box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2); */
+}
+
+.question-text {
+  font-size: 42px;
+  margin-bottom: 20px;
+  color: #e67e22;
+}
+
+.options-container {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.option-button {
+  background-color: #8bcaf5;
+  color: #fff;
+  font-size: 32px;
+  padding: 12px 24px;
+  min-width: 100px;
+  height: 80px;
+  border-radius: 40px; /* Pill shape */
+  border: none;
+  cursor: pointer;
+  transition: 0.3s;
+  box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  word-break: break-word;
+}
+
+.option-button:hover {
+  background-color: #64b5eb;
+}
+
+.message {
+  margin-top: 20px;
+  font-size: 24px;
+  font-weight: bold;
+}
+.level-selector {
+  margin: 1rem;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.5rem;
+}
