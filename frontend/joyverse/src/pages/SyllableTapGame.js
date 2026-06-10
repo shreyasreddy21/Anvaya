@@ -3,6 +3,7 @@ import axios from 'axios';
 import './SyllableTapGame.css';
 import useEmotionDetection from "../hooks/useEmotionDetection";
 import useGameSessionLogger from "../hooks/useGameSessionLogger";
+import TTSButton from "../components/TTSButton";
 // const hardcodedWords = {
 //   easy: [
 //     { word: 'cat', syllables: 1, split: ['cat'] },
@@ -160,7 +161,10 @@ const handleDifficultyChange = (e) => {
     <div className="game-content">
       {currentWord ? (
         <>
-          <p className="current-word">{currentWord.word}</p>
+          <div className="tts-inline" style={{ justifyContent: "center" }}>
+            <p className="current-word" style={{ margin: 0 }}>{currentWord.word}</p>
+            <TTSButton text={currentWord.word} size="md" label="Say the word aloud" />
+          </div>
 
           {isFirstWord && (
             <div className="syllable-split">

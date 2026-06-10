@@ -1,0 +1,191 @@
+/* ── ReportPage layout ────────────────────────────────────── */
+.report-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 24px 60px;
+  font-family: 'OpenDyslexic', 'Arial', sans-serif;
+  color: #1a202c;
+  background: #fff;
+}
+
+.report-toolbar {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-bottom: 28px;
+}
+
+.report-toolbar button {
+  padding: 8px 22px;
+  border-radius: 10px;
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.report-btn--print {
+  background: #4338ca;
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(67, 56, 202, 0.35);
+}
+
+.report-btn--back {
+  background: #e0e7ff;
+  color: #312e81;
+}
+
+/* ── Header ───────────────────────────────────────────────── */
+.report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 16px;
+  border-bottom: 3px solid #e0e7ff;
+  margin-bottom: 24px;
+}
+
+.report-title {
+  font-size: 1.9rem;
+  font-weight: 900;
+  color: #312e81;
+  margin: 0;
+}
+
+.report-meta {
+  font-size: 0.85rem;
+  color: #64748b;
+  text-align: right;
+}
+
+/* ── Section cards ────────────────────────────────────────── */
+.report-section {
+  margin-bottom: 28px;
+}
+
+.report-section-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #3730a3;
+  border-left: 4px solid #6366f1;
+  padding-left: 10px;
+  margin: 0 0 14px;
+}
+
+/* ── Summary grid ─────────────────────────────────────────── */
+.report-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.report-stat-card {
+  background: #f0f4ff;
+  border-radius: 14px;
+  padding: 14px 12px;
+  text-align: center;
+}
+
+.report-stat-val {
+  font-size: 2rem;
+  font-weight: 900;
+  color: #4338ca;
+  line-height: 1;
+}
+
+.report-stat-lbl {
+  font-size: 0.77rem;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+/* ── Mood distribution ────────────────────────────────────── */
+.report-mood-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.report-mood-chip {
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+/* ── Reading progression ──────────────────────────────────── */
+.report-level-badge {
+  display: inline-block;
+  background: #d1fae5;
+  color: #065f46;
+  font-size: 1.1rem;
+  font-weight: 800;
+  padding: 4px 18px;
+  border-radius: 20px;
+  border: 2px solid #10b981;
+  margin-bottom: 10px;
+}
+
+.report-level-history {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.report-level-history-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 0.88rem;
+  color: #374151;
+}
+
+/* ── Trend table ──────────────────────────────────────────── */
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  margin-top: 8px;
+}
+
+.report-table th {
+  background: #e0e7ff;
+  padding: 5px 10px;
+  text-align: left;
+  font-weight: 700;
+}
+
+.report-table td {
+  padding: 5px 10px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.report-table tr:last-child td { border-bottom: none; }
+
+/* ── Pair accuracy ────────────────────────────────────────── */
+.report-pair-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.report-pair-chip {
+  padding: 4px 14px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  border: 2px solid;
+}
+
+/* ── Print styles ─────────────────────────────────────────── */
+@media print {
+  .report-toolbar   { display: none !important; }
+  .report-container { padding: 0; max-width: 100%; }
+  body              { background: #fff; }
+  .report-stat-card { break-inside: avoid; }
+  .report-section   { break-inside: avoid; }
+}

@@ -316,10 +316,11 @@
 
 
 // ShapeMemoryGame.jsx
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import "./ShapeMemoryGame.css";
 import useEmotionDetection from "../hooks/useEmotionDetection";
-import useGameSessionLogger from "../hooks/useGameSessionLogger"; // Adjust path
+import useGameSessionLogger from "../hooks/useGameSessionLogger";
+import TTSButton from "../components/TTSButton";
 
 const emotionThemes = {
   Happy: "#ffeaa7",
@@ -560,9 +561,19 @@ function ShapeMemoryGame() {
         </select>
       </div>
 
-      <p className="smg-prompt">
-        {isStarting ? `Memorize the tiles! Target shape is:` : `Find all tiles with:`} <span className="smg-target-shape">{currentTarget}</span>
-      </p>
+      <div className="tts-inline" style={{ justifyContent: "center" }}>
+        <p className="smg-prompt" style={{ margin: 0 }}>
+          {isStarting ? `Memorize the tiles! Target shape is:` : `Find all tiles with:`}{' '}
+          <span className="smg-target-shape">{currentTarget}</span>
+        </p>
+        <TTSButton
+          text={isStarting
+            ? `Memorize the tiles! Target shape is: ${currentTarget}`
+            : `Find all tiles with: ${currentTarget}`}
+          size="sm"
+          label="Read instructions aloud"
+        />
+      </div>
 
       <p className="smg-timer">{isStarting ? `Memorizing... ${timeLeft}s` : `Time Left: ${timeLeft}s`}</p>
       <p className="smg-clicks-left">Chances Left: {clicksLeft}</p>

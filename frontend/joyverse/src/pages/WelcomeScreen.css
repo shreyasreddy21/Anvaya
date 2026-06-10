@@ -1,7 +1,4 @@
-
-.welcome-to-joyverse {
-  margin: 0;
-}
+.welcome-to-joyverse { margin: 0; }
 
 .welcome-to-joyverse-container,
 .lets-play-and {
@@ -9,7 +6,6 @@
   position: relative;
   text-shadow: 0 6.5px 5px rgba(0, 0, 0, 0.25);
 }
-
 .welcome-to-joyverse-container {
   margin: 0;
   height: 109px;
@@ -18,7 +14,6 @@
   font-family: inherit;
   display: inline-block;
 }
-
 .lets-play-and {
   font-size: var(--font-size-32);
 }
@@ -30,12 +25,7 @@
   flex-direction: column;
   align-items: center;
 }
-
-.welcometext {
-  justify-content: flex-start;
-  gap: 17px;
-}
-
+.welcometext { justify-content: flex-start; gap: 17px; }
 .header {
   height: 270px;
   background-color: var(--color-cornflowerblue);
@@ -52,118 +42,98 @@
   font-family: var(--font-opendyslexic);
 }
 
+/* ── Mood selector section ──────────────────────────────────────────────────── */
 .how-are-you {
   margin: 0;
   align-self: stretch;
-  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.how-are-you-text {
+  margin: 0;
   font-size: inherit;
   font-weight: 400;
   font-family: inherit;
   text-shadow: 0 6.5px 5px rgba(0, 0, 0, 0.25), 6.5px 6.5px 5px rgba(0, 0, 0, 0.25);
 }
 
-.happyicon {
-  width: 117px;
-  max-height: 100%;
-  object-fit: cover;
-}
-
-.happybutton {
-  height: 150px;
+/* ── Mood card ──────────────────────────────────────────────────────────────── */
+.mood-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px 16px;
   width: 150px;
-  border-radius: 75px;
-  background-color: var(--color-darkseagreen);
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  padding: var(--padding-10) 14px var(--padding-10) var(--padding-12);
-}
-
-.happybutton,
-.neutralbutton,
-.sadbutton,
-.smilebutton {
-  box-shadow: 0 5px 5px rgba(0, 0, 0, 0.25);
-  border: 1px solid var(--color-black);
-  box-sizing: border-box;
-  align-items: center;
-}
-
-.smilebutton {
-  height: 155px;
-  width: 155px;
-  border-radius: 77.5px;
-  background-color: var(--color-peachpuff-200);
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  padding: var(--padding-12) 17px var(--padding-12) var(--padding-14);
-}
-
-.neutralbutton,
-.sadbutton {
-  height: 156px;
-  width: 156px;
+  background-color: var(--mood-color, var(--color-darkseagreen));
+  border: 2px solid var(--color-black);
   border-radius: var(--br-60);
-  padding: 17px var(--padding-14);
-}
-
-.neutralbutton {
-  background-color: var(--color-khaki);
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-}
-
-.sadbutton {
-  background-color: var(--color-royalblue);
-}
-
-.angrybutton,
-.emojibuttons,
-.emojiselector,
-.sadbutton {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-}
-
-.angrybutton {
-  height: 156px;
-  width: 156px;
   box-shadow: 0 5px 5px rgba(0, 0, 0, 0.25);
-  border-radius: var(--br-60);
-  background-color: var(--color-lightpink);
-  border: 1px solid var(--color-black);
-  box-sizing: border-box;
-  align-items: center;
-  padding: 17px var(--padding-14);
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease,
+              filter 0.18s ease;
+}
+.mood-card:hover {
+  transform: translateY(-4px) scale(1.04);
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.2);
+  filter: brightness(1.05);
+}
+.mood-card--selected {
+  border-color: #3730a3;
+  border-width: 3px;
+  box-shadow: 0 0 0 4px rgba(121, 129, 250, 0.45), 0 8px 16px rgba(0, 0, 0, 0.2);
+  transform: translateY(-6px) scale(1.07);
+}
+.mood-card--selected:hover {
+  transform: translateY(-6px) scale(1.07);
 }
 
-.emojibuttons,
-.emojiselector {
-  align-self: stretch;
-  flex: 1;
+.mood-icon {
+  width: 90px;
+  height: 90px;
+  object-fit: cover;
+  pointer-events: none;
+}
+.mood-label {
+  font-family: var(--font-opendyslexic);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-black);
+  text-align: center;
+}
+.mood-check {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 1.1rem;
+  color: #3730a3;
+  font-weight: 900;
+}
+
+/* ── Emoji button row ───────────────────────────────────────────────────────── */
+.emojibuttons {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
   align-items: flex-start;
-  gap: 82px;
+  gap: 22px;
+  flex-wrap: wrap;
 }
 
 .emojiselector {
+  display: flex;
   flex-direction: column;
   align-items: center;
   gap: 26px;
-}
-
-.emojiselectorcontainer,
-.start-playing {
-  font-family: var(--font-opendyslexic);
-  color: var(--color-black);
-  text-align: center;
+  align-self: stretch;
 }
 
 .emojiselectorcontainer {
   width: 1282px;
-  height: 350px;
+  min-height: 380px;
   box-shadow: 0 5px 5px rgba(0, 0, 0, 0.25);
   border-radius: var(--br-30);
   background-color: var(--color-cornflowerblue);
@@ -175,15 +145,40 @@
   justify-content: center;
   padding: 32px 77px;
   font-size: 52px;
+  font-family: var(--font-opendyslexic);
+  color: var(--color-black);
+  text-align: center;
 }
 
+/* ── Message box ────────────────────────────────────────────────────────────── */
+.welcome-message-box {
+  font-family: var(--font-opendyslexic);
+  background-color: var(--color-snow);
+  border: 2px solid var(--color-black);
+  border-radius: var(--br-30);
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.2);
+  padding: 20px 28px;
+  font-size: var(--font-size-32);
+  text-align: center;
+  max-width: 900px;
+  color: var(--color-darkslategray);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* ── Start button ───────────────────────────────────────────────────────────── */
 .start-playing {
   align-self: stretch;
   flex: 1;
   position: relative;
   font-size: var(--font-size-24);
+  font-family: var(--font-opendyslexic);
+  color: var(--color-black);
+  text-align: center;
 }
-
 .startplayingtext {
   width: 328px;
   display: flex;
@@ -191,14 +186,6 @@
   align-items: center;
   justify-content: center;
 }
-
-.startplayingbutton,
-.welcomescreen {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
 .startplayingbutton {
   cursor: pointer;
   border: 1px solid var(--color-black);
@@ -209,103 +196,70 @@
   box-shadow: 0 5px 5px rgba(0, 0, 0, 0.25);
   border-radius: var(--br-30);
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
+  transition: filter 0.18s ease, box-shadow 0.18s ease, transform 0.15s ease;
+}
+.startplayingbutton:hover:not(.startplayingbutton--disabled) {
+  box-shadow: none;
+  filter: brightness(90%);
+  transform: scale(1.02);
+}
+.startplayingbutton--disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  filter: grayscale(0.3);
 }
 
+/* ── Overall page layout ───────────────────────────────────────────────────── */
 .welcomescreen {
   width: 100%;
   min-height: 100vh;
   position: relative;
   background-color: var(--color-beige);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: flex-start;
   gap: 80px;
   line-height: normal;
   letter-spacing: normal;
 }
-.welcome-message-box {
-  font-family: var(--font-opendyslexic);
-  background-color: var(--color-snow);
-  border: 2px solid var(--color-black);
-  border-radius: var(--br-30);
-  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.2);
-  padding: 20px 20px;
-  font-size: var(--font-size-32);
-  text-align: center;
-  max-width: 900px;
-  color: var(--color-deepslategray);
-}
-.happybutton:hover,
-.smilebutton:hover,
-.neutralbutton:hover,
-.sadbutton:hover,
-.angrybutton:hover,
-.startplayingbutton:hover {
-  box-shadow: none;
-  filter: brightness(90%);
-}
+
+/* ── Responsive ────────────────────────────────────────────────────────────── */
 @media screen and (max-width: 1225px) {
   .lets-play-and,
-  .welcome-to-joyverse-container {
-    display: none;
-  }
+  .welcome-to-joyverse-container { display: none; }
 }
-
 @media screen and (max-width: 1050px) {
-  .emojibuttons {
-    gap: 40px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
+  .emojibuttons { gap: 14px; }
   .emojiselectorcontainer {
-    padding-left: 38px;
-    padding-right: 38px;
-    box-sizing: border-box;
-    width: calc(100% - 52px);
+    padding-left: 24px;
+    padding-right: 24px;
+    width: calc(100% - 40px);
   }
 }
-
 @media screen and (max-width: 750px) {
-  .header {
-    padding-left: 70px;
-    padding-right: 70px;
-    box-sizing: border-box;
-  }
-
-  .how-are-you {
-    font-size: var(--font-size-32);
-  }
-
-  .welcomescreen {
-    gap: 40px;
-  }
+  .header { padding-left: 70px; padding-right: 70px; box-sizing: border-box; }
+  .how-are-you-text { font-size: var(--font-size-32); }
+  .welcomescreen { gap: 40px; }
+  .mood-card { width: 120px; }
+  .mood-icon { width: 70px; height: 70px; }
 }
-
+@media screen and (max-width: 560px) {
+  .emojibuttons { gap: 10px; }
+  .mood-card { width: 100px; padding: 8px 8px 12px; }
+  .mood-icon { width: 58px; height: 58px; }
+  .mood-label { font-size: 0.85rem; }
+}
 @media screen and (max-width: 450px) {
-  .header {
-    padding-left: var(--padding-20);
-    padding-right: var(--padding-20);
-    box-sizing: border-box;
-  }
-
-  .how-are-you {
-    font-size: var(--font-size-24);
-  }
-
-  .emojibuttons {
-    gap: 21px;
-  }
-
-  .start-playing {
-    font-size: 25px;
-  }
-
-  .startplayingbutton {
-    width: calc(100% - 52px);
-  }
-
-  .welcomescreen {
-    gap: 10px;
-  }
+  .header { padding-left: var(--padding-20); padding-right: var(--padding-20); }
+  .how-are-you-text { font-size: var(--font-size-24); }
+  .emojibuttons { gap: 8px; }
+  .start-playing { font-size: 25px; }
+  .startplayingbutton { width: calc(100% - 52px); }
+  .welcomescreen { gap: 10px; }
 }

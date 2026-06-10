@@ -1,11 +1,14 @@
 import mongoose from 'mongoose';
 
+const PHONICS_LEVELS = ['CVC', 'Blends', 'Digraphs', 'VowelPatterns', 'AdvancedPatterns'];
+
 const mirrorQuestionSchema = new mongoose.Schema({
   level: {
     type: String,
     required: true,
     enum: ["Easy", "Medium", "Hard"]
   },
+  phonicsLevel: { type: String, enum: PHONICS_LEVELS, default: null },
   question: {
     type: String,
     required: true

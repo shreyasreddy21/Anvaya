@@ -1,13 +1,6 @@
-@font-face {
-  font-family: "OpenDyslexic";
-  src: url("/public/OpenDyslexic-Regular.otf");
-  font-weight: 400;
-}
-@font-face {
-  font-family: "OpenDyslexic";
-  src: url("/public/OpenDyslexic-Bold.otf");
-  font-weight: 700;
-}
+/* @font-face for OpenDyslexic is declared in public/index.html using
+   %PUBLIC_URL% so that CRA's webpack does not attempt to resolve it
+   as a module path at build time. */
 
 html,
 body {
@@ -15,7 +8,13 @@ body {
   padding: 0;
   height: 100%;
   background-color: var(--color-beige);
-  line-height: normal;
+  /* a11y-controlled typography */
+  font-family: var(--a11y-font);
+  font-size: var(--a11y-font-size);
+  letter-spacing: var(--a11y-letter-spacing);
+  line-height: var(--a11y-line-height);
+  /* smooth background-color transitions between emotion themes */
+  transition: background-color 0.6s ease;
 }
 
 :root {
@@ -46,7 +45,14 @@ body {
   --br-30: 39px;
   --br-60: 78px;
 
-  --font-opendyslexic: OpenDyslexic;
+  /* --font-opendyslexic now references --a11y-font so all existing
+     font-family: var(--font-opendyslexic) declarations respond to
+     the accessibility system without touching each component's CSS */
+  --a11y-font: OpenDyslexic, sans-serif;
+  --a11y-font-size: 1rem;
+  --a11y-letter-spacing: normal;
+  --a11y-line-height: 1.5;
+  --font-opendyslexic: var(--a11y-font);
 
   --font-size-19: 25px;
   --font-size-24: 31px;

@@ -1,13 +1,32 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { isDeprecated } from "../config/deprecatedGames";
 import "./Games.css";
-import shapememoryimg from '../assets/shapememorygame.png';
-import mathfunimg from '../assets/mathfun.png';
-import funquizimg from '../assets/funquiz.png';
-import wordquestimg from '../assets/wordquest.png';
+import shapememoryimg    from '../assets/shapememorygame.png';
+import mathfunimg        from '../assets/mathfun.png';
+import funquizimg        from '../assets/funquiz.png';
+import wordquestimg      from '../assets/wordquest.png';
 import syllabletapgameimg from '../assets/syllabletapgame.png';
-import letterbridgeimg from '../assets/letterbridge.png';
+import letterbridgeimg   from '../assets/letterbridge.png';
 import mirrorwordgameimg from '../assets/mirrorwordsgame.png';
+
+const ALL_GAMES = [
+  { key: 'wordpuzzleadventure', label: 'Word Quest',           route: '/wordpuzzleadventure', image: wordquestimg,        alt: 'Word Quest',              cssClass: 'games-page-word-game'           },
+  { key: 'mathgame',            label: 'Math Fun',             route: '/mathgame',            image: mathfunimg,          alt: 'Math Fun',                cssClass: 'games-page-math-game'           },
+  { key: 'quiz',                label: 'Fun Quiz',             route: '/quiz',                image: funquizimg,          alt: 'Fun Quiz',                cssClass: 'games-page-quiz-game'           },
+  { key: 'syllabletapgame',     label: 'Fun with Syllables',   route: '/syllabletapgame',     image: syllabletapgameimg,  alt: 'Fun with Syllables',      cssClass: 'games-page-syllable-game'       },
+  { key: 'shapememorygame',     label: 'Shape Memory Game',    route: '/shapememorygame',     image: shapememoryimg,      alt: 'Shape Memory Game',       cssClass: 'games-page-shapememory-game'    },
+  { key: 'letterbridge',        label: 'Letter Bridging Game', route: '/letterbridge',        image: letterbridgeimg,     alt: 'Letter Bridging Game',    cssClass: 'games-page-letterbridge-game'   },
+  { key: 'mirrorword',          label: 'Mirror Word Game',     route: '/mirrorword',          image: mirrorwordgameimg,   alt: 'Mirror Word Game',        cssClass: 'games-page-mirrorword-game'     },
+  // New clinical games — no PNG asset yet, use emoji tile
+  { key: 'phonemetap',          label: 'Phoneme Tap',          route: '/phonemetap',          image: null, emoji: '👂',  alt: 'Phoneme Tap Game',        cssClass: 'games-page-phonemetap-game'        },
+  { key: 'lettersound',         label: 'Letter Sound Match',   route: '/lettersound',         image: null, emoji: '🔤',  alt: 'Letter Sound Match',      cssClass: 'games-page-lettersound-game'       },
+  { key: 'confusableletter',    label: 'Letter Trainer',       route: '/confusableletter',    image: null, emoji: '🔡',  alt: 'Confusable Letter Trainer', cssClass: 'games-page-confusable-game'       },
+  { key: 'ran',                 label: 'Rapid Naming',         route: '/ran',                 image: null, emoji: '⚡',  alt: 'Rapid Automatized Naming', cssClass: 'games-page-ran-game'              },
+  { key: 'verbalmemory',        label: 'Sequence Memory',      route: '/verbalmemory',        image: null, emoji: '🧠',  alt: 'Verbal Sequence Memory',   cssClass: 'games-page-verbalmemory-game'     },
+];
+
+const ACTIVE_GAMES = ALL_GAMES.filter(g => !isDeprecated(g.key));
 
 function Games() {
   const navigate = useNavigate();
@@ -15,9 +34,7 @@ function Games() {
 
   useEffect(() => {
     document.body.style.overflow = "auto";
-    return () => {
-      document.body.style.overflow = "hidden";
-    };
+    return () => { document.body.style.overflow = "hidden"; };
   }, []);
 
   useEffect(() => {
@@ -26,66 +43,44 @@ function Games() {
   }, []);
 
   const backgroundMap = {
-    happy: "url('/backgrounds/happy.jpg')",
-    smile: "url('/backgrounds/happy.jpg')",
+    happy:   "url('/backgrounds/happy.jpg')",
+    smile:   "url('/backgrounds/happy.jpg')",
     neutral: "url('/backgrounds/neutral.jpg')",
-    sad: "url('/backgrounds/sad.jpg')",
-    angry: "url('/backgrounds/angry.jpg')",
+    sad:     "url('/backgrounds/sad.jpg')",
+    angry:   "url('/backgrounds/angry.jpg')",
   };
 
   const backgroundStyle = {
-  backgroundImage: backgroundMap[emotion] || backgroundMap["neutral"],
-  backgroundSize: "cover",
-  backgroundPosition: "center",
-  backgroundRepeat: "no-repeat",
-  minHeight: "100vh",
-  minWidth: "100vw",
-};
+    backgroundImage:    backgroundMap[emotion] || backgroundMap["neutral"],
+    backgroundSize:     "cover",
+    backgroundPosition: "center",
+    backgroundRepeat:   "no-repeat",
+    minHeight:          "100vh",
+    minWidth:           "100vw",
+  };
 
   return (
     <div style={backgroundStyle}>
       <div className="games-page-container">
-
         <section className="header-container">
           <h1 className="games-page-title">Choose Your Game</h1>
           <p className="games-page-subtitle">Select a game and start your adventure!</p>
         </section>
 
         <div className="games-page-list">
-          <div className="games-page-card games-page-word-game" onClick={() => navigate("/wordpuzzleadventure")}>
-            <img src={wordquestimg} alt="Word Quest" className="game-icon" />
-            <h2>Word Quest</h2>
-          </div>
-
-          <div className="games-page-card games-page-math-game" onClick={() => navigate("/mathgame")}>
-            <img src={mathfunimg} alt="Math Fun" className="game-icon" />
-            <h2>Math Fun</h2>
-          </div>
-
-          <div className="games-page-card games-page-quiz-game" onClick={() => navigate("/quiz")}>
-            <img src={funquizimg} alt="Fun Quiz" className="game-icon" />
-            <h2>Fun Quiz</h2>
-          </div>
-
-          <div className="games-page-card games-page-syllable-game" onClick={() => navigate("/syllabletapgame")}>
-            <img src={syllabletapgameimg} alt="Fun with Syllables" className="game-icon" />
-            <h2>Fun with Syllables</h2>
-          </div>
-
-          <div className="games-page-card games-page-shapememory-game" onClick={() => navigate("/shapememorygame")}>
-            <img src={shapememoryimg} alt="Shape Memory Game" className="game-icon" />
-            <h2>Shape Memory Game</h2>
-          </div>
-
-          <div className="games-page-card games-page-letterbridge-game" onClick={() => navigate("/letterbridge")}>
-            <img src={letterbridgeimg} alt="Letter Bridging Game" className="game-icon" />
-            <h2>Letter Bridging Game</h2>
-          </div>
-
-          <div className="games-page-card games-page-mirrorword-game" onClick={() => navigate("/mirrorword")}>
-            <img src={mirrorwordgameimg} alt="Mirror Word Game" className="game-icon" />
-            <h2>Mirror Word Game</h2>
-          </div>
+          {ACTIVE_GAMES.map(game => (
+            <div
+              key={game.key}
+              className={`games-page-card ${game.cssClass}`}
+              onClick={() => navigate(game.route)}
+            >
+              {game.image
+                ? <img src={game.image} alt={game.alt} className="game-icon" />
+                : <span className="game-icon-emoji" role="img" aria-label={game.alt}>{game.emoji}</span>
+              }
+              <h2>{game.label}</h2>
+            </div>
+          ))}
         </div>
       </div>
     </div>

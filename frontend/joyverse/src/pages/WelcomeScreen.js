@@ -1,103 +1,160 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import TTSButton from "../components/TTSButton";
 import "./WelcomeScreen.css";
 
-const WelcomeScreen = () => {
-  const [username, setUsername] = useState("");
-  const [message, setMessage] = useState("");
-  const [emotion, setEmotion] = useState("neutral");
+/**
+ * Mood definitions — each card shows an image, a label, a background colour,
+ * and a supportive message that appears after selection.
+ */
+const MOODS = [
+  {
+    key:     "happy",
+    label:   "Happy",
+    icon:    "/images/happy.png",
+    color:   "#afe9b8",
+    message: "Yay! You're feeling great! Keep smiling! 😄",
+  },
+  {
+    key:     "smile",
+    label:   "Smiley",
+    icon:    "/images/smile.png",
+    color:   "#f9d2af",
+    message: "Nice! A smile makes everything better 😊",
+  },
+  {
+    key:     "neutral",
+    label:   "Okay",
+    icon:    "/images/neutral.png",
+    color:   "#f8f09f",
+    message: "That's okay! Let's make your day better 🙂",
+  },
+  {
+    key:     "sad",
+    label:   "Sad",
+    icon:    "/images/sad.png",
+    color:   "#7981fa",
+    message: "Oh no! Big hugs coming your way 🤗",
+  },
+  {
+    key:     "angry",
+    label:   "Angry",
+    icon:    "/images/angry.png",
+    color:   "#f7a0a0",
+    message: "It's okay to feel angry. Take deep breaths 🌈",
+  },
+];
+
+const WELCOME_TEXT = (name) =>
+  `Welcome to JoyVerse, ${name}! Let's play and learn together.`;
+const HOW_ARE_YOU = "How are you feeling today?";
+
+export default function WelcomeScreen() {
+  const [username,      setUsername]      = useState("");
+  const [selectedMood,  setSelectedMood]  = useState(null);
+  const [message,       setMessage]       = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
-    const storedUsername = localStorage.getItem("username");
-    setUsername(storedUsername || "Guest");
-
-    const selectedEmotion = localStorage.getItem("selectedEmotion") || "neutral";
-    setEmotion(selectedEmotion);
+    setUsername(localStorage.getItem("username") || "Guest");
+    // Pre-select any previously saved mood
+    const saved = localStorage.getItem("selectedEmotion");
+    if (saved) {
+      const found = MOODS.find((m) => m.key === saved);
+      if (found) {
+        setSelectedMood(found.key);
+        setMessage(found.message);
+      }
+    }
   }, []);
+
   useEffect(() => {
     document.body.style.overflow = "auto";
-    return () => {
-      document.body.style.overflow = "hidden";
-    };
+    return () => { document.body.style.overflow = "hidden"; };
   }, []);
 
-  const showMessage = (mood) => {
-    const messages = {
-      happy: "Yay! You're feeling great! Keep smiling! ",
-      smile: "Nice! A smile makes everything better ",
-      neutral: "That's okay! Let’s make your day better ",
-      sad: "Oh no! Big hugs coming your way ",
-      angry: "It's okay to feel angry. Take deep breaths ",
-    };
-    setMessage(messages[mood]);
-    localStorage.setItem("selectedEmotion", mood);
-    setEmotion(mood);
+  const handleMoodSelect = (mood) => {
+    setSelectedMood(mood.key);
+    setMessage(mood.message);
+    localStorage.setItem("selectedEmotion", mood.key);
   };
 
-//  const backgroundMap = {
-//     happy: "url('https://i.pinimg.com/736x/21/01/cc/2101cc1cb0e93c8d9f04145946118c7f.jpg')", 
-//     smile: "url('https://i.pinimg.com/736x/8d/40/84/8d4084f141bce06f25e99b44956790d3.jpg')",
-//     neutral: "url('https://i.pinimg.com/736x/65/6b/e4/656be4ba10df99f7849a609f4bac3f36.jpg')",
-//     sad: "url('https://i.pinimg.com/736x/7a/7c/2a/7a7c2a56165f9015ad57e4cebb16c022.jpg')",
-//     angry: "url('https://i.pinimg.com/736x/4b/06/6a/4b066a49cbe4ff6061c742fa23858687.jpg')",
-//   };
-
-//   const backgroundStyle = {
-//     backgroundImage: backgroundMap[emotion],
-//     backgroundSize: "cover",
-//     backgroundPosition: "center",
-//     minHeight: "100vh",
-//     width: "100%",
-//   };
-
   const handleStartPlaying = () => {
+    if (!selectedMood) return;
     navigate("/games");
   };
 
+  const welcomeStr = WELCOME_TEXT(username);
+
   return (
     <div className="welcomescreen">
+      {/* ── Header ─────────────────────────────────────────────────────────── */}
       <section className="header">
         <div className="welcometext">
           <h3 className="welcome-to-joyverse-container">
-            <p className="welcome-to-joyverse">{`Welcome to JoyVerse, ${username}!`}</p>
+            <p className="welcome-to-joyverse">{welcomeStr}</p>
           </h3>
-          <div className="lets-play-and">Let's play and learn together :)</div>
-        </div>
-      </section>
-
-      <section className="emojiselectorcontainer">
-        <div className="emojiselector">
-          <h2 className="how-are-you">How are you feeling today?</h2>
-          <div className="emojibuttons">
-            <div className="happybutton" onClick={() => showMessage("happy")}>
-              <img className="happyicon" alt="happy" src="/images/happy.png" />
-            </div>
-            <div className="smilebutton" onClick={() => showMessage("smile")}>
-              <img className="happyicon" alt="Smile" src="/images/smile.png" />
-            </div>
-            <div className="neutralbutton" onClick={() => showMessage("neutral")}>
-              <img className="happyicon" alt="Neutral" src="/images/neutral.png" />
-            </div>
-            <div className="sadbutton" onClick={() => showMessage("sad")}>
-              <img className="happyicon" alt="Sad" src="/images/sad.png" />
-            </div>
-            <div className="angrybutton" onClick={() => showMessage("angry")}>
-              <img className="happyicon" alt="Angry" src="/images/angry.png" />
-            </div>
+          <div className="lets-play-and tts-inline">
+            Let's play and learn together :)
+            <TTSButton text={welcomeStr} size="sm" label="Read welcome message aloud" />
           </div>
         </div>
       </section>
 
-      {message && <div className="welcome-message-box">{message}</div>}
+      {/* ── Mood check-in ──────────────────────────────────────────────────── */}
+      <section className="emojiselectorcontainer">
+        <div className="emojiselector">
+          <div className="how-are-you tts-inline">
+            <h2 className="how-are-you-text">{HOW_ARE_YOU}</h2>
+            <TTSButton text={HOW_ARE_YOU} size="sm" label="Read question aloud" />
+          </div>
 
-      <button className="startplayingbutton" onClick={handleStartPlaying}>
+          <div className="emojibuttons">
+            {MOODS.map((mood) => (
+              <button
+                key={mood.key}
+                className={`mood-card ${selectedMood === mood.key ? "mood-card--selected" : ""}`}
+                style={{ "--mood-color": mood.color }}
+                onClick={() => handleMoodSelect(mood)}
+                aria-pressed={selectedMood === mood.key}
+                aria-label={`I'm feeling ${mood.label}`}
+              >
+                <img
+                  className="mood-icon"
+                  alt={mood.label}
+                  src={mood.icon}
+                />
+                <span className="mood-label">{mood.label}</span>
+                {selectedMood === mood.key && (
+                  <span className="mood-check" aria-hidden="true">✓</span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Mood message ───────────────────────────────────────────────────── */}
+      {message && (
+        <div className="welcome-message-box tts-inline">
+          <span>{message}</span>
+          <TTSButton text={message} size="sm" label="Read message aloud" />
+        </div>
+      )}
+
+      {/* ── Start button ───────────────────────────────────────────────────── */}
+      <button
+        className={`startplayingbutton ${!selectedMood ? "startplayingbutton--disabled" : ""}`}
+        onClick={handleStartPlaying}
+        disabled={!selectedMood}
+        aria-disabled={!selectedMood}
+      >
         <div className="startplayingtext">
-          <div className="start-playing">Start Playing</div>
+          <div className="start-playing">
+            {selectedMood ? "Start Playing" : "Pick a mood first!"}
+          </div>
         </div>
       </button>
     </div>
   );
-};
-
-export default WelcomeScreen;
+}

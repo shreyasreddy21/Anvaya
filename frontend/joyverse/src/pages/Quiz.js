@@ -123,6 +123,7 @@ import axios from "axios";
 import confetti from "canvas-confetti";
 import useEmotionDetection from "../hooks/useEmotionDetection";
 import useGameSessionLogger from "../hooks/useGameSessionLogger";
+import TTSButton from "../components/TTSButton";
 import "./Quiz.css";
 
 const emotionToDifficulty = {
@@ -230,7 +231,14 @@ const Quiz = () => {
           </div>
         ) : (
           <>
-            <p className="game-question">{questions[currentQuestion].question}</p>
+            <div className="tts-inline" style={{ justifyContent: "center" }}>
+              <p className="game-question" style={{ margin: 0 }}>{questions[currentQuestion].question}</p>
+              <TTSButton
+                text={questions[currentQuestion].question}
+                size="sm"
+                label="Read question aloud"
+              />
+            </div>
             <div className="quiz-options">
               {questions[currentQuestion].options.map((option, index) => (
                 <button key={index} className="quiz-option-btn" onClick={() => handleAnswerClick(option.text)}>

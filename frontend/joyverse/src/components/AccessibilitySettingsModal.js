@@ -1,0 +1,156 @@
+import React from 'react';
+import { useAccessibility } from '../context/AccessibilityContext';
+import './AccessibilitySettingsModal.css';
+
+const FONT_OPTIONS = [
+  { value: 'opendyslexic', label: 'OpenDyslexic', desc: 'Dyslexia-friendly font' },
+  { value: 'default',      label: 'Standard',     desc: 'System default font' },
+];
+
+const FONT_SIZE_OPTIONS = [
+  { value: 'normal', label: 'Normal',      sample: 'Aa' },
+  { value: 'large',  label: 'Large',       sample: 'Aa' },
+  { value: 'xl',     label: 'Extra Large', sample: 'Aa' },
+];
+
+const LETTER_SPACING_OPTIONS = [
+  { value: 'normal', label: 'Normal' },
+  { value: 'wide',   label: 'Wide'   },
+  { value: 'wider',  label: 'Wider'  },
+];
+
+const LINE_HEIGHT_OPTIONS = [
+  { value: 'normal',  label: 'Normal'  },
+  { value: 'relaxed', label: 'Relaxed' },
+  { value: 'loose',   label: 'Loose'   },
+];
+
+export default function AccessibilitySettingsModal() {
+  const { settings, updateSetting, resetSettings, modalOpen, setModalOpen } =
+    useAccessibility();
+
+  if (!modalOpen) return null;
+
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) setModalOpen(false);
+  };
+
+  return (
+    <div
+      className="a11y-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="a11y-modal-title"
+      onClick={handleOverlayClick}
+    >
+      <div className="a11y-modal">
+        {/* Header */}
+        <div className="a11y-modal-header">
+          <h2 id="a11y-modal-title" className="a11y-modal-title">
+            Accessibility Settings
+          </h2>
+          <button
+            className="a11y-close-btn"
+            onClick={() => setModalOpen(false)}
+            aria-label="Close accessibility settings"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="a11y-modal-body">
+
+          {/* Font */}
+          <section className="a11y-section">
+            <h3 className="a11y-section-label">Font</h3>
+            <div className="a11y-btn-group">
+              {FONT_OPTIONS.map(opt => (
+                <button
+                  key={opt.value}
+                  className={`a11y-option-btn a11y-font-btn ${settings.font === opt.value ? 'active' : ''}`}
+                  onClick={() => updateSetting('font', opt.value)}
+                  style={{
+                    fontFamily:
+                      opt.value === 'opendyslexic'
+                        ? 'OpenDyslexic, sans-serif'
+                        : "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+                  }}
+                >
+                  <span className="a11y-opt-label">{opt.label}</span>
+                  <span className="a11y-opt-desc">{opt.desc}</span>
+                </button>
+              ))}
+            </div>
+          </section>
+
+          {/* Text Size */}
+          <section className="a11y-section">
+            <h3 className="a11y-section-label">Text Size</h3>
+            <div className="a11y-btn-group">
+              {FONT_SIZE_OPTIONS.map((opt, i) => (
+                <button
+                  key={opt.value}
+                  className={`a11y-option-btn ${settings.fontSize === opt.value ? 'active' : ''}`}
+                  onClick={() => updateSetting('fontSize', opt.value)}
+                  style={{ fontSize: ['1rem', '1.15rem', '1.35rem'][i] }}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </section>
+
+          {/* Letter Spacing */}
+          <section className="a11y-section">
+            <h3 className="a11y-section-label">Letter Spacing</h3>
+            <div className="a11y-btn-group">
+              {LETTER_SPACING_OPTIONS.map((opt, i) => (
+                <button
+                  key={opt.value}
+                  className={`a11y-option-btn ${settings.letterSpacing === opt.value ? 'active' : ''}`}
+                  onClick={() => updateSetting('letterSpacing', opt.value)}
+                  style={{ letterSpacing: ['normal', '0.06em', '0.14em'][i] }}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </section>
+
+          {/* Line Height */}
+          <section className="a11y-section">
+            <h3 className="a11y-section-label">Line Height</h3>
+            <div className="a11y-btn-group">
+              {LINE_HEIGHT_OPTIONS.map(opt => (
+                <button
+                  key={opt.value}
+                  className={`a11y-option-btn ${settings.lineHeight === opt.value ? 'active' : ''}`}
+                  onClick={() => updateSetting('lineHeight', opt.value)}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </section>
+
+          {/* Live Preview */}
+          <div className="a11y-preview" aria-label="Text preview">
+            <p>The quick brown fox jumps over the lazy dog.</p>
+            <p className="a11y-preview-letters">b &nbsp; d &nbsp; p &nbsp; q &nbsp; n &nbsp; u</p>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="a11y-modal-footer">
+          <button className="a11y-reset-btn" onClick={resetSettings}>
+            Reset to Default
+          </button>
+          <button className="a11y-done-btn" onClick={() => setModalOpen(false)}>
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,264 @@
+.ptg-container {
+  width: 100%;
+  max-width: 100vw;
+  padding: 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ptg-card {
+  width: 100%;
+  max-width: 680px;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  font-family: var(--a11y-font, "OpenDyslexic", sans-serif);
+}
+
+.ptg-title {
+  font-size: 2rem;
+  margin: 0;
+  font-weight: 700;
+}
+
+/* ─── Controls bar ─────────────────────────────────────────── */
+.ptg-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.ptg-select-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.ptg-select-group select {
+  padding: 4px 8px;
+  border-radius: 8px;
+  border: 2px solid #ccc;
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.ptg-progress {
+  font-size: 0.9rem;
+  opacity: 0.75;
+  margin: 0;
+}
+
+/* ─── Score bar ──────────────────────────────────────────────── */
+.ptg-scorebar {
+  display: flex;
+  gap: 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.45);
+  border-radius: 12px;
+  padding: 8px 20px;
+}
+
+/* ─── Word display card ──────────────────────────────────────── */
+.ptg-word-card {
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 18px;
+  padding: 24px 32px;
+  text-align: center;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.ptg-word-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.ptg-word {
+  font-size: 3.2rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.ptg-instruction {
+  font-size: 0.95rem;
+  opacity: 0.75;
+  margin: 8px 0 0;
+}
+
+/* ─── Tap circles ─────────────────────────────────────────────── */
+.ptg-circles-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  min-height: 52px;
+}
+
+.ptg-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.ptg-circle--active {
+  background-color: #6366f1;
+  transform: scale(1.05);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.35);
+}
+
+.ptg-circle--correct {
+  background-color: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.35);
+}
+
+.ptg-circle--wrong {
+  background-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.35);
+}
+
+.ptg-expected-hint {
+  font-size: 0.85rem;
+  opacity: 0.65;
+  margin-left: 6px;
+}
+
+/* ─── Tap button ─────────────────────────────────────────────── */
+.ptg-tap-btn {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #818cf8);
+  color: #fff;
+  font-size: 1.8rem;
+  font-weight: 700;
+  font-family: inherit;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  letter-spacing: 2px;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ptg-tap-btn:active {
+  transform: scale(0.93);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+}
+
+/* ─── Action row ─────────────────────────────────────────────── */
+.ptg-action-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.ptg-btn {
+  padding: 10px 28px;
+  border-radius: 12px;
+  border: none;
+  font-size: 1rem;
+  font-family: inherit;
+  cursor: pointer;
+  font-weight: 600;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+}
+
+.ptg-btn:active { transform: scale(0.97); }
+
+.ptg-btn--primary {
+  background: #6366f1;
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(99, 102, 241, 0.4);
+}
+
+.ptg-btn--secondary {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.ptg-btn--ghost {
+  background: transparent;
+  color: inherit;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+}
+
+/* ─── Feedback ───────────────────────────────────────────────── */
+.ptg-feedback {
+  font-size: 1.05rem;
+  font-weight: 600;
+  text-align: center;
+  margin: 0;
+}
+
+.ptg-feedback--correct { color: #166534; }
+.ptg-feedback--wrong   { color: #991b1b; }
+
+/* ─── Game-over summary ──────────────────────────────────────── */
+.ptg-summary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.ptg-stat {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.ptg-results-list {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+
+.ptg-result-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+}
+
+.ptg-result-row.correct { background: #dcfce7; color: #14532d; }
+.ptg-result-row.wrong   { background: #fee2e2; color: #7f1d1d; }
+
+.ptg-result-word   { font-weight: 700; }
+.ptg-result-detail { font-size: 0.85rem; opacity: 0.85; }
+
+/* ─── Loading / error states ─────────────────────────────────── */
+.ptg-loading,
+.ptg-error {
+  font-size: 1rem;
+  text-align: center;
+  padding: 20px;
+}
+
+.ptg-error { color: #991b1b; }

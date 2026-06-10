@@ -3,6 +3,7 @@ import confetti from "canvas-confetti";
 import "./WordPuzzleAdventure.css";
 import useEmotionDetection from "../hooks/useEmotionDetection";
 import useGameSessionLogger from "../hooks/useGameSessionLogger";
+import TTSButton from "../components/TTSButton";
 const WordPuzzleAdventure = () => {
   const { emotion, videoRef, canvasRef } = useEmotionDetection();
   const [difficulty, setDifficulty] = useState("easy");
@@ -172,6 +173,10 @@ const WordPuzzleAdventure = () => {
   }}>
         <h2 className="game-title">Word Puzzle Adventure</h2>
         <p className="game-text emotion-text">Detected Emotion: {emotion}</p>
+        <div className="tts-inline" style={{ justifyContent: "center", marginBottom: "6px" }}>
+          <span className="game-text">Unscramble the letters to form the correct word!</span>
+          <TTSButton text="Unscramble the letters to form the correct word!" size="sm" label="Read instructions aloud" />
+        </div>
 
         <div className="difficulty-selector">
           {["easy", "medium", "hard"].map((level) => (
@@ -240,8 +245,11 @@ const WordPuzzleAdventure = () => {
                 Skip
               </button>
             </div>
-            {hintVisible && (
-              <p className="game-text">{currentWordObj.hint}</p>
+            {hintVisible && currentWordObj.hint && (
+              <div className="tts-inline" style={{ justifyContent: "center" }}>
+                <p className="game-text" style={{ margin: 0 }}>{currentWordObj.hint}</p>
+                <TTSButton text={currentWordObj.hint} size="sm" label="Read hint aloud" />
+              </div>
             )}
             {feedback && (
               <p className="game-text">{feedback}</p>

@@ -160,14 +160,62 @@
 .games-page-mirrorword-game:hover{
   background-color: rgba(255, 255, 255, 0.5);
 }
+/* Phoneme Tap Game card */
+.games-page-phonemetap-game {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background-color: rgba(224, 231, 255, 0.4);
+}
+.games-page-phonemetap-game:hover { background-color: rgba(224, 231, 255, 0.7); }
+
+/* Letter Sound Match card */
+.games-page-lettersound-game {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background-color: rgba(209, 250, 229, 0.4);
+}
+.games-page-lettersound-game:hover { background-color: rgba(209, 250, 229, 0.7); }
+
+/* Verbal Sequence Memory card */
+.games-page-verbalmemory-game {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background-color: rgba(224, 231, 255, 0.45);
+}
+.games-page-verbalmemory-game:hover { background-color: rgba(224, 231, 255, 0.75); }
+
+/* Confusable Letter Trainer card */
+.games-page-confusable-game {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background-color: rgba(237, 233, 254, 0.45);
+}
+.games-page-confusable-game:hover { background-color: rgba(237, 233, 254, 0.75); }
+
+/* Rapid Naming (RAN) card */
+.games-page-ran-game {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background-color: rgba(209, 250, 229, 0.45);
+}
+.games-page-ran-game:hover { background-color: rgba(209, 250, 229, 0.75); }
+
 .game-icon {
   width: 210px;
   height: 150px;
   margin-bottom: 25px;
-  /* magin-top: 10px; */
-  border-radius: 15%; 
-  /* object-fit: contain; */
-  /* animation: pop 2s infinite; */
+  border-radius: 15%;
+}
+
+/* Emoji fallback when a game has no PNG asset */
+.game-icon-emoji {
+  font-size: 80px;
+  line-height: 150px;
+  display: block;
+  width: 210px;
+  height: 150px;
+  text-align: center;
+  margin-bottom: 25px;
 }
 
 /* Optional fun animation */

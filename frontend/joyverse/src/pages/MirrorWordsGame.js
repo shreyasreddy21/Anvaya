@@ -3,6 +3,7 @@ import confetti from "canvas-confetti";
 import "./MirrorWordsGame.css";
 import useEmotionDetection from "../hooks/useEmotionDetection";
 import useGameSessionLogger from "../hooks/useGameSessionLogger";
+import TTSButton from "../components/TTSButton";
 const MirrorWordsGame = () => {
   const { emotion, videoRef, canvasRef } = useEmotionDetection();
   const [level, setLevel] = useState("Easy");
@@ -108,7 +109,14 @@ const filteredQuestions = questions;
           <div className="mirror-score">Score: {score}</div>
           <div className="mirror-game-board">
             <div className="mirror-game-question">
-              {filteredQuestions[current]?.question}
+              <span>{filteredQuestions[current]?.question}</span>
+              {filteredQuestions[current]?.question && (
+                <TTSButton
+                  text={filteredQuestions[current].question}
+                  label="Read question aloud"
+                  size="sm"
+                />
+              )}
             </div>
             <div className="mirror-options">
               {filteredQuestions[current]?.options.map((option, index) => (

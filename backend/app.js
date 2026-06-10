@@ -12,6 +12,17 @@ import syllableRoutes from './Routes/syllableGame.js';
 import mirrorQuestionRoutes from './Routes/mirrorQuestion.js';
 import superadminRoutes from './Routes/superadmin.js';
 import emotionRoutes from './Routes/emotion.js';
+import phonicsContentRoutes  from './Routes/phonicsContent.js';
+import phonemeTapRoutes      from './Routes/phonemeTap.js';
+import letterSoundRoutes     from './Routes/letterSound.js';
+import confusableLetterRoutes from './Routes/confusableLetter.js';
+import ranRoutes             from './Routes/ran.js';
+import verbalMemoryRoutes    from './Routes/verbalMemory.js';
+import assignedSessionsRoutes from './Routes/assignedSessions.js';
+import readingProgressRoutes  from './Routes/readingProgress.js';
+import adaptationLogRoutes    from './Routes/adaptationLog.js';
+import analyticsRoutes        from './Routes/analytics.js';
+import reportsRoutes          from './Routes/reports.js';
 dotenv.config();
 
 const app = express();
@@ -29,6 +40,17 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
+app.use('/api/phonics',             phonicsContentRoutes);
+app.use('/api/phoneme-tap',        phonemeTapRoutes);
+app.use('/api/letter-sound',       letterSoundRoutes);
+app.use('/api/confusable-letter',  confusableLetterRoutes);
+app.use('/api/ran',                ranRoutes);
+app.use('/api/verbal-memory',     verbalMemoryRoutes);
+app.use('/api/assigned-sessions', assignedSessionsRoutes);
+app.use('/api/reading-progress',  readingProgressRoutes);
+app.use('/api/adaptation-log',    adaptationLogRoutes);
+app.use('/api/analytics',         analyticsRoutes);
+app.use('/api/reports',           reportsRoutes);
 app.use('/api/emotion', emotionRoutes);
 app.use('/api/superadmin', superadminRoutes);
 app.use('/api/auth', authRoutes);

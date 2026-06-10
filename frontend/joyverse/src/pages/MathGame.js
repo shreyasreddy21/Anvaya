@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import confetti from "canvas-confetti";
 import useEmotionDetection from "../hooks/useEmotionDetection";
 import useGameSessionLogger from "../hooks/useGameSessionLogger";
+import TTSButton from "../components/TTSButton";
 import "./Quiz.css";
 
 const emotionToDifficulty = {
@@ -175,7 +176,14 @@ const MathGame = () => {
           </div>
         ) : (
           <>
-            <p className="game-question">{`${num1} ${operation} ${num2} = ?`}</p>
+            <div className="tts-inline" style={{ justifyContent: "center" }}>
+              <p className="game-question" style={{ margin: 0 }}>{`${num1} ${operation} ${num2} = ?`}</p>
+              <TTSButton
+                text={`What is ${num1} ${operation === 'x' ? 'times' : operation} ${num2}?`}
+                size="sm"
+                label="Read question aloud"
+              />
+            </div>
             <div className="quiz-options">
               {options.map((option, index) => (
                 <button

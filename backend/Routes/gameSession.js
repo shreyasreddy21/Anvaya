@@ -11,13 +11,19 @@ const expressionSchema = new mongoose.Schema({
 
 // Game session schema
 const gameSessionSchema = new mongoose.Schema({
-    username: { type: String, required: true },
+    username:   { type: String, required: true },
     difficulty: { type: String, enum: ['easy', 'medium', 'hard'], required: true },
-    startTime: { type: Date, required: true },
-    endTime: { type: Date, required: true },
-    gameName: { type: String, required: true }, // ✅ Added
+    startTime:  { type: Date, required: true },
+    endTime:    { type: Date, required: true },
+    gameName:   { type: String, required: true },
     expressions: [expressionSchema],
-    score: { type: Number, required: true },
+    score:      { type: Number, required: true },
+    // Child's self-reported mood from the WelcomeScreen mood check-in.
+    // Optional — older sessions without this field remain valid.
+    moodAtStart:  { type: String, default: null },
+    // Phonics level being practiced when the session was played.
+    // Set only for games that have a level selector (e.g. LetterBridge).
+    phonicsLevel: { type: String, default: null },
   });
   
 // Use existing model if already defined (for hot reload compatibility)
@@ -29,7 +35,7 @@ router.post('/', async (req, res) => {
     console.log("✅ Incoming POST /api/sessions");
     console.log("📦 Payload:", req.body);
 
-    const { username, difficulty, startTime, endTime, expressions, gameName,score } = req.body;
+    const { username, difficulty, startTime, endTime, expressions, gameName, score, moodAtStart, phonicsLevel } = req.body;
 
     const session = new GameSession({
         username,
@@ -37,8 +43,10 @@ router.post('/', async (req, res) => {
         startTime,
         endTime,
         expressions,
-        gameName, // ✅ Add to document
+        gameName,
         score,
+        moodAtStart:  moodAtStart  || null,
+        phonicsLevel: phonicsLevel || null,
     });
 
     await session.save();

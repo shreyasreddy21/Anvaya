@@ -1,0 +1,224 @@
+.lsg-container {
+  width: 100%;
+  max-width: 100vw;
+  padding: 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.lsg-card {
+  width: 100%;
+  max-width: 680px;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  font-family: var(--a11y-font, "OpenDyslexic", sans-serif);
+}
+
+.lsg-title {
+  font-size: 2rem;
+  margin: 0;
+  font-weight: 700;
+}
+
+/* ─── Controls ──────────────────────────────────────────────── */
+.lsg-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.lsg-select-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.lsg-select-group select {
+  padding: 4px 8px;
+  border-radius: 8px;
+  border: 2px solid #ccc;
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+/* ─── Status bar ─────────────────────────────────────────────── */
+.lsg-statusbar {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 440px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.45);
+  border-radius: 12px;
+  padding: 8px 18px;
+}
+
+/* ─── Letter display panel ───────────────────────────────────── */
+.lsg-letter-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 24px;
+  padding: 28px 48px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  min-width: 180px;
+}
+
+.lsg-letter-display {
+  font-size: 4.5rem;
+  font-weight: 700;
+  letter-spacing: 4px;
+  line-height: 1;
+}
+
+.lsg-play-btn {
+  font-size: 1.6rem;
+  background: #e0e7ff;
+  border: none;
+  border-radius: 50%;
+  width: 52px;
+  height: 52px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.lsg-play-btn:hover  { background: #c7d2fe; }
+.lsg-play-btn:active { transform: scale(0.94); }
+
+.lsg-prompt {
+  font-size: 1rem;
+  opacity: 0.8;
+  margin: 0;
+  text-align: center;
+}
+
+/* ─── Answer options ─────────────────────────────────────────── */
+.lsg-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  width: 100%;
+  max-width: 480px;
+}
+
+.lsg-option {
+  padding: 18px 10px;
+  border-radius: 16px;
+  border: 3px solid transparent;
+  background: rgba(255, 255, 255, 0.7);
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.lsg-option:hover:not(:disabled):not(.lsg-option--correct):not(.lsg-option--wrong) {
+  transform: scale(1.04);
+  border-color: #6366f1;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.lsg-option:active:not(:disabled) { transform: scale(0.97); }
+
+.lsg-option--correct {
+  background: #dcfce7;
+  border-color: #22c55e;
+  color: #166534;
+}
+
+.lsg-option--wrong {
+  background: #fee2e2;
+  border-color: #ef4444;
+  color: #991b1b;
+}
+
+.lsg-option--dimmed {
+  opacity: 0.45;
+}
+
+/* ─── Generic buttons ────────────────────────────────────────── */
+.lsg-btn {
+  padding: 10px 32px;
+  border-radius: 12px;
+  border: none;
+  font-size: 1rem;
+  font-family: inherit;
+  cursor: pointer;
+  font-weight: 600;
+  transition: opacity 0.15s ease;
+}
+
+.lsg-btn--primary {
+  background: #6366f1;
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(99, 102, 241, 0.4);
+}
+
+/* ─── Summary ────────────────────────────────────────────────── */
+.lsg-summary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.lsg-stat {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.lsg-results-list {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.lsg-result-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+}
+
+.lsg-result-row.correct { background: #dcfce7; color: #14532d; }
+.lsg-result-row.wrong   { background: #fee2e2; color: #7f1d1d; }
+
+.lsg-result-letter { font-size: 1.2rem; font-weight: 700; }
+.lsg-result-detail { font-size: 0.85rem; opacity: 0.85; }
+
+/* ─── Loading / error ────────────────────────────────────────── */
+.lsg-loading,
+.lsg-error {
+  font-size: 1rem;
+  text-align: center;
+  padding: 20px;
+}
+
+.lsg-error { color: #991b1b; }
