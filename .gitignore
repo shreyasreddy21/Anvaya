@@ -1,1 +1,13 @@
 .env
+backend/.env
+
+# Python virtual environments
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Node
+node_modules/
+frontend/joyverse/build/

@@ -1,0 +1,20 @@
+# JoyVerse — TFLite Emotion Inference Server
+#
+# Requires Python 3.10, 3.11, or 3.12 (NOT 3.13+)
+# TensorFlow does not publish wheels for Python 3.13+.
+#
+# Setup (from this directory):
+#   python3.12 -m venv .venv
+#   source .venv/bin/activate      # Windows: .venv\Scripts\activate
+#   pip install -r requirements.txt
+#
+# Run:
+#   python model.py
+#
+# Health check:
+#   curl http://127.0.0.1:5000/health
+
+flask==3.1.3
+flask-cors==6.0.5
+numpy==2.4.6
+tensorflow==2.21.0
