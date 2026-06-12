@@ -6,6 +6,8 @@ import useGameSessionLogger from "../hooks/useGameSessionLogger";
 import TTSButton from "../components/TTSButton";
 import GameShell from "../components/GameShell";
 import { API_BASE } from '../config/api';
+import { getCardStyle } from '../utils/EmotionThemeMap';
+
 const MirrorWordsGame = () => {
   const { emotion, confidence, videoRef, canvasRef } = useEmotionDetection();
   const [level, setLevel] = useState("Easy");
@@ -15,7 +17,9 @@ const MirrorWordsGame = () => {
   const [score, setScore] = useState(0);
   const [showResult, setShowResult] = useState(false);
   const [questions, setQuestions] = useState([]);
-    const username = localStorage.getItem("username");
+    const cardStyle = getCardStyle(emotion);
+
+  const username = localStorage.getItem("username");
   const { endSession } = useGameSessionLogger({ username, difficulty:level, expression: emotion ,score});
   useEffect(() => {
   const fetchQuestions = async () => {
@@ -95,7 +99,7 @@ const filteredQuestions = questions;
 
   return (
     <GameShell title="Mirror Words" emotion={emotion} confidence={confidence}>
-    <div className="mirror-game-container">
+    <div className="mirror-game-container" style={cardStyle}>
       <div className="mirror-game-title">Mirror Words</div>
       
       <div className="mirror-level-selector">

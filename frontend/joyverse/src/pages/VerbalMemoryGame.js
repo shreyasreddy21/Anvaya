@@ -279,7 +279,6 @@ export default function VerbalMemoryGame() {
           </div>
 
           <button className="vsm-btn vsm-btn--start" onClick={() => {
-            // Reset session state
             roundsRef.current  = [];
             seqLengthRef.current = SEQ_CONFIG[difficulty].start;
             consFailsRef.current = 0;
@@ -295,6 +294,8 @@ export default function VerbalMemoryGame() {
           </button>
         </div>
       </div>
+      <video  ref={videoRef}  autoPlay style={{ display: 'none' }} />
+      <canvas ref={canvasRef} width={640} height={480} style={{ display: 'none' }} />
       </GameShell>
     );
   }
@@ -309,7 +310,6 @@ export default function VerbalMemoryGame() {
           <h2 className="vsm-phase-title">🎧 Listen carefully…</h2>
           <p className="vsm-phase-sub">Sequence length: <strong>{sequence.length}</strong></p>
 
-          {/* Animated item tiles */}
           <div className="vsm-listen-tiles">
             {sequence.map((item, i) => (
               <div key={i}
@@ -335,6 +335,8 @@ export default function VerbalMemoryGame() {
           </p>
         </div>
       </div>
+      <video  ref={videoRef}  autoPlay style={{ display: 'none' }} />
+      <canvas ref={canvasRef} width={640} height={480} style={{ display: 'none' }} />
       </GameShell>
     );
   }
@@ -348,7 +350,6 @@ export default function VerbalMemoryGame() {
           <div className="vsm-round-badge">Round {roundNum + 1} / {ROUNDS_PER_GAME}</div>
           <h2 className="vsm-phase-title">Recall the sequence</h2>
 
-          {/* Sequence slots */}
           <div className="vsm-sequence-bar">
             {sequence.map((_, i) => (
               <div key={i}
@@ -362,7 +363,6 @@ export default function VerbalMemoryGame() {
             Tap items in the order you heard them ({recalled.length}/{sequence.length})
           </p>
 
-          {/* Item pool grid */}
           <div className="vsm-pool-grid"
             style={{ '--pool-cols': currentPool.length <= 8 ? 4 : 4 }}>
             {currentPool.map(item => {
@@ -392,6 +392,8 @@ export default function VerbalMemoryGame() {
           </div>
         </div>
       </div>
+      <video  ref={videoRef}  autoPlay style={{ display: 'none' }} />
+      <canvas ref={canvasRef} width={640} height={480} style={{ display: 'none' }} />
       </GameShell>
     );
   }
@@ -431,14 +433,13 @@ export default function VerbalMemoryGame() {
                 : 'Try again — listen extra carefully to the order.'}
           </p>
           <p className="vsm-auto-advance">Auto-advancing in 4s…</p>
-          <button className="vsm-btn vsm-btn--primary" onClick={() => {
-            // Cancel auto-advance and proceed immediately
-            proceedAfterFeedback();
-          }}>
+          <button className="vsm-btn vsm-btn--primary" onClick={proceedAfterFeedback}>
             {roundNum + 1 >= ROUNDS_PER_GAME ? 'See Results' : 'Next Round →'}
           </button>
         </div>
       </div>
+      <video  ref={videoRef}  autoPlay style={{ display: 'none' }} />
+      <canvas ref={canvasRef} width={640} height={480} style={{ display: 'none' }} />
       </GameShell>
     );
   }
@@ -460,7 +461,6 @@ export default function VerbalMemoryGame() {
           <h1 className="vsm-title">Verbal Sequence Memory</h1>
           <h2 style={{ textAlign: 'center', margin: '0 0 8px' }}>Session complete! 🎉</h2>
 
-          {/* Key metrics */}
           <div className="vsm-stats-grid">
             <div className="vsm-stat-box vsm-stat--wms">
               <span className="vsm-stat-val">{wms}</span>
@@ -481,7 +481,6 @@ export default function VerbalMemoryGame() {
             </div>
           </div>
 
-          {/* Per-round breakdown */}
           <details className="vsm-details">
             <summary>Round-by-round results</summary>
             <div className="vsm-rounds-list">
@@ -507,9 +506,9 @@ export default function VerbalMemoryGame() {
             Play Again
           </button>
         </div>
-        <video  ref={videoRef}  autoPlay style={{ display: 'none' }} />
-        <canvas ref={canvasRef} width={640} height={480} style={{ display: 'none' }} />
       </div>
+      <video  ref={videoRef}  autoPlay style={{ display: 'none' }} />
+      <canvas ref={canvasRef} width={640} height={480} style={{ display: 'none' }} />
       </GameShell>
     );
   }

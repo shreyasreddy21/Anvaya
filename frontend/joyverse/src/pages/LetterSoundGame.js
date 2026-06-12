@@ -3,6 +3,7 @@ import confetti from 'canvas-confetti';
 import './LetterSoundGame.css';
 import useEmotionDetection from '../hooks/useEmotionDetection';
 import useGameSessionLogger from '../hooks/useGameSessionLogger';
+import GameShell from '../components/GameShell';
 import SpeechService from '../services/SpeechService';
 import { PHONICS_LEVEL_ORDER, PhonicsLevelMeta } from '../constants/PhonicsLevel';
 import axios from 'axios';
@@ -15,19 +16,19 @@ function shuffle(arr) {
 }
 
 export default function LetterSoundGame() {
-  const { emotion, videoRef, canvasRef } = useEmotionDetection();
+  const { emotion, confidence, videoRef, canvasRef } = useEmotionDetection();
 
   const [phonicsLevel, setPhonicsLevel] = useState('CVC');
   const [difficulty,   setDifficulty]   = useState('easy');
 
-  const [questions,    setQuestions]    = useState([]);
-  const [currentIdx,   setCurrentIdx]   = useState(0);
-  const [selected,     setSelected]     = useState(null);
-  const [score,        setScore]        = useState(0);
-  const [results,      setResults]      = useState([]);
-  const [gameOver,     setGameOver]     = useState(false);
-  const [loading,      setLoading]      = useState(false);
-  const [loadError,    setLoadError]    = useState('');
+  const [questions,  setQuestions]  = useState([]);
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [selected,   setSelected]   = useState(null);
+  const [score,      setScore]      = useState(0);
+  const [results,    setResults]    = useState([]);
+  const [gameOver,   setGameOver]   = useState(false);
+  const [loading,    setLoading]    = useState(false);
+  const [loadError,  setLoadError]  = useState('');
 
   const questionStartRef = useRef(null);
   const sessionStartRef  = useRef(new Date());
@@ -72,7 +73,6 @@ export default function LetterSoundGame() {
 
   const current = questions[currentIdx];
 
-  // Auto-play letter/pattern sound when question changes
   useEffect(() => {
     if (current && !selected && !gameOver) {
       questionStartRef.current = Date.now();
@@ -108,7 +108,6 @@ export default function LetterSoundGame() {
       SpeechService.speak(`Not quite. The answer is ${current.correct}.`, { rate: 0.85 });
     }
 
-    // Auto-advance after 1.4 s
     setTimeout(() => {
       const nextIdx = currentIdx + 1;
       if (nextIdx >= questions.length) {
@@ -124,17 +123,16 @@ export default function LetterSoundGame() {
     setGameOver(true);
     confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
 
-    const total          = allResults.length;
-    const correct        = allResults.filter(r => r.correct).length;
-    const overallAccuracy= total ? Math.round((correct / total) * 100) : 0;
+    const total             = allResults.length;
+    const correct           = allResults.filter(r => r.correct).length;
+    const overallAccuracy   = total ? Math.round((correct / total) * 100) : 0;
     const avgReactionTimeMs = total
       ? Math.round(allResults.reduce((s, r) => s + r.reactionTimeMs, 0) / total)
       : 0;
-    const finalScore     = correct * 10;
-    const moodAtStart    = localStorage.getItem('selectedEmotion') || 'neutral';
+    const finalScore  = correct * 10;
+    const moodAtStart = localStorage.getItem('selectedEmotion') || 'neutral';
 
-    // Save to dedicated analytics collection
-    axios.post('http://localhost:4000/api/letter-sound', {
+    axios.post(`${API_BASE}/api/letter-sound`, {
       username,
       phonicsLevel,
       difficulty,
@@ -147,11 +145,8 @@ export default function LetterSoundGame() {
       moodAtStart,
     }).catch(err => console.error('Failed to save letter-sound session:', err));
 
-    // General session log
     endSession();
   };
-
-  const handleReplay = () => { loadQuestions(phonicsLevel, difficulty); };
 
   const getEmotionStyles = (em) => {
     switch (em) {
@@ -164,143 +159,149 @@ export default function LetterSoundGame() {
   };
   const cardStyle = getEmotionStyles(emotion);
 
+
   if (loading) {
     return (
-      <div className="lsg-container">
-        <div className="lsg-card" style={cardStyle}>
-          <p className="lsg-loading">Loading questions…</p>
+      <GameShell title="Letter Sound Match" emotion={emotion} confidence={confidence}>
+        <div className="lsg-container">
+          <div className="lsg-card" style={cardStyle}>
+            <p className="lsg-loading">Loading questions…</p>
+          </div>
         </div>
-      </div>
+        <video  ref={videoRef}  autoPlay style={{ display: 'none' }} />
+        <canvas ref={canvasRef} width={640} height={480} style={{ display: 'none' }} />
+      </GameShell>
     );
   }
 
   if (loadError) {
     return (
-      <div className="lsg-container">
-        <div className="lsg-card" style={cardStyle}>
-          <h1 className="lsg-title">Letter Sound Match</h1>
-          <p className="lsg-error">{loadError}</p>
-        </div>
-      </div>
-    );
-  }
-
-  // ── Game over summary ──────────────────────────────────────────────────
-  if (gameOver) {
-    const total          = results.length;
-    const correctCount   = results.filter(r => r.correct).length;
-    const accuracy       = total ? Math.round((correctCount / total) * 100) : 0;
-    const avgRT          = total
-      ? Math.round(results.reduce((s, r) => s + r.reactionTimeMs, 0) / total)
-      : 0;
-
-    return (
-      <div className="lsg-container">
-        <div className="lsg-card" style={cardStyle}>
-          <h1 className="lsg-title">Letter Sound Match</h1>
-          <div className="lsg-summary">
-            <h2>Round complete! 🎉</h2>
-            <p className="lsg-stat">Score: <strong>{score}</strong></p>
-            <p className="lsg-stat">Correct: <strong>{correctCount}/{total}</strong></p>
-            <p className="lsg-stat">Accuracy: <strong>{accuracy}%</strong></p>
-            <p className="lsg-stat">Avg reaction time: <strong>{(avgRT / 1000).toFixed(1)}s</strong></p>
-            <div className="lsg-results-list">
-              {results.map((r, i) => (
-                <div key={i} className={`lsg-result-row ${r.correct ? 'correct' : 'wrong'}`}>
-                  <span className="lsg-result-letter">{r.letter}</span>
-                  <span className="lsg-result-detail">
-                    {r.correct ? '✅' : `❌ → ${results.find((_, j) => j === i)?.letter}`}
-                    &nbsp;{r.selectedOption}&nbsp;·&nbsp;{(r.reactionTimeMs / 1000).toFixed(1)}s
-                  </span>
-                </div>
-              ))}
-            </div>
-            <button className="lsg-btn lsg-btn--primary" onClick={handleReplay}>Play Again</button>
+      <GameShell title="Letter Sound Match" emotion={emotion} confidence={confidence}>
+        <div className="lsg-container">
+          <div className="lsg-card" style={cardStyle}>
+            <h1 className="lsg-title">Letter Sound Match</h1>
+            <p className="lsg-error">{loadError}</p>
           </div>
         </div>
         <video  ref={videoRef}  autoPlay style={{ display: 'none' }} />
         <canvas ref={canvasRef} width={640} height={480} style={{ display: 'none' }} />
-      </div>
+      </GameShell>
     );
   }
 
-  // ── Active question ────────────────────────────────────────────────────
+  if (gameOver) {
+    const total        = results.length;
+    const correctCount = results.filter(r => r.correct).length;
+    const accuracy     = total ? Math.round((correctCount / total) * 100) : 0;
+    const avgRT        = total
+      ? Math.round(results.reduce((s, r) => s + r.reactionTimeMs, 0) / total)
+      : 0;
+
+    return (
+      <GameShell title="Letter Sound Match" emotion={emotion} confidence={confidence}>
+        <div className="lsg-container">
+          <div className="lsg-card" style={cardStyle}>
+            <h1 className="lsg-title">Letter Sound Match</h1>
+            <div className="lsg-summary">
+              <h2>Round complete! 🎉</h2>
+              <p className="lsg-stat">Score: <strong>{score}</strong></p>
+              <p className="lsg-stat">Correct: <strong>{correctCount}/{total}</strong></p>
+              <p className="lsg-stat">Accuracy: <strong>{accuracy}%</strong></p>
+              <p className="lsg-stat">Avg reaction time: <strong>{(avgRT / 1000).toFixed(1)}s</strong></p>
+              <div className="lsg-results-list">
+                {results.map((r, i) => (
+                  <div key={i} className={`lsg-result-row ${r.correct ? 'correct' : 'wrong'}`}>
+                    <span className="lsg-result-letter">{r.letter}</span>
+                    <span className="lsg-result-detail">
+                      {r.correct ? '✅' : `❌ → ${r.selectedOption}`}
+                      &nbsp;·&nbsp;{(r.reactionTimeMs / 1000).toFixed(1)}s
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <button className="lsg-btn lsg-btn--primary" onClick={() => loadQuestions(phonicsLevel, difficulty)}>
+                Play Again
+              </button>
+            </div>
+          </div>
+        </div>
+        <video  ref={videoRef}  autoPlay style={{ display: 'none' }} />
+        <canvas ref={canvasRef} width={640} height={480} style={{ display: 'none' }} />
+      </GameShell>
+    );
+  }
+
   const shuffledOptions = current ? shuffle(current.options) : [];
 
   return (
-    <div className="lsg-container">
-      <div className="lsg-card" style={cardStyle}>
-        <h1 className="lsg-title">Letter Sound Match</h1>
-
-        {/* Controls */}
-        <div className="lsg-controls">
-          <div className="lsg-select-group">
-            <label htmlFor="lsg-level">Phonics Level:</label>
-            <select id="lsg-level" value={phonicsLevel} onChange={e => setPhonicsLevel(e.target.value)}>
-              {PHONICS_LEVEL_ORDER.map(lv => (
-                <option key={lv} value={lv}>{PhonicsLevelMeta[lv].label}</option>
-              ))}
-            </select>
-          </div>
-          <div className="lsg-select-group">
-            <label htmlFor="lsg-diff">Difficulty:</label>
-            <select id="lsg-diff" value={difficulty} onChange={e => setDifficulty(e.target.value)}>
-              <option value="easy">🟢 Easy</option>
-              <option value="medium">🟡 Medium</option>
-              <option value="hard">🔴 Hard</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Progress + score */}
-        <div className="lsg-statusbar">
-          <span>Question {currentIdx + 1} / {questions.length}</span>
-          <span>⭐ {score}</span>
-        </div>
-
-        {/* Letter display */}
-        {current && (
-          <>
-            <div className="lsg-letter-panel">
-              <span className="lsg-letter-display">{current.question}</span>
-              <button
-                className="lsg-play-btn"
-                onClick={() => SpeechService.speak(current.question, { rate: 0.7 })}
-                aria-label={`Hear the sound of ${current.question}`}
-                title="Play sound again"
-              >
-                🔊
-              </button>
+    <GameShell title="Letter Sound Match" emotion={emotion} confidence={confidence}>
+      <div className="lsg-container">
+        <div className="lsg-card" style={cardStyle}>
+          <div className="lsg-controls">
+            <div className="lsg-select-group">
+              <label htmlFor="lsg-level">Phonics Level:</label>
+              <select id="lsg-level" value={phonicsLevel} onChange={e => setPhonicsLevel(e.target.value)}>
+                {PHONICS_LEVEL_ORDER.map(lv => (
+                  <option key={lv} value={lv}>{PhonicsLevelMeta[lv].label}</option>
+                ))}
+              </select>
             </div>
-            <p className="lsg-prompt">Which word starts with this sound?</p>
-
-            {/* Options */}
-            <div className="lsg-options">
-              {shuffledOptions.map((opt) => {
-                let cls = 'lsg-option';
-                if (selected) {
-                  if (opt === current.correct) cls += ' lsg-option--correct';
-                  else if (opt === selected)   cls += ' lsg-option--wrong';
-                  else                          cls += ' lsg-option--dimmed';
-                }
-                return (
-                  <button
-                    key={opt}
-                    className={cls}
-                    onClick={() => handleSelect(opt)}
-                    disabled={!!selected}
-                  >
-                    {opt}
-                  </button>
-                );
-              })}
+            <div className="lsg-select-group">
+              <label htmlFor="lsg-diff">Difficulty:</label>
+              <select id="lsg-diff" value={difficulty} onChange={e => setDifficulty(e.target.value)}>
+                <option value="easy">🟢 Easy</option>
+                <option value="medium">🟡 Medium</option>
+                <option value="hard">🔴 Hard</option>
+              </select>
             </div>
-          </>
-        )}
+          </div>
+
+          <div className="lsg-statusbar">
+            <span>Question {currentIdx + 1} / {questions.length}</span>
+            <span>⭐ {score}</span>
+          </div>
+
+          {current && (
+            <>
+              <div className="lsg-letter-panel">
+                <span className="lsg-letter-display">{current.question}</span>
+                <button
+                  className="lsg-play-btn"
+                  onClick={() => SpeechService.speak(current.question, { rate: 0.7 })}
+                  aria-label={`Hear the sound of ${current.question}`}
+                  title="Play sound again"
+                >
+                  🔊
+                </button>
+              </div>
+              <p className="lsg-prompt">Which word starts with this sound?</p>
+
+              <div className="lsg-options">
+                {shuffledOptions.map(opt => {
+                  let cls = 'lsg-option';
+                  if (selected) {
+                    if (opt === current.correct) cls += ' lsg-option--correct';
+                    else if (opt === selected)   cls += ' lsg-option--wrong';
+                    else                          cls += ' lsg-option--dimmed';
+                  }
+                  return (
+                    <button
+                      key={opt}
+                      className={cls}
+                      onClick={() => handleSelect(opt)}
+                      disabled={!!selected}
+                    >
+                      {opt}
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </div>
       </div>
-
       <video  ref={videoRef}  autoPlay style={{ display: 'none' }} />
       <canvas ref={canvasRef} width={640} height={480} style={{ display: 'none' }} />
-    </div>
+    </GameShell>
   );
 }

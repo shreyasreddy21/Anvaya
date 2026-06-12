@@ -1,47 +1,62 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import SpeechService from '../services/SpeechService';
 import './TTSButton.css';
 
 /**
- * TTSButton — read-aloud button for any instructional or question text.
+ * TTSButton — read-aloud button.
  *
  * Props:
- *   text      {string}  The text to speak when clicked. Required.
- *   label     {string}  Accessible aria-label override (defaults to "Read aloud").
- *   className {string}  Additional CSS class for the host element.
+ *   text      {string}  Text to speak. Required.
+ *   label     {string}  aria-label override.
+ *   className {string}  Extra class.
  *   size      {string}  'sm' | 'md' (default 'md').
- *   rate      {number}  Speech rate passed to SpeechService (default 0.85).
+ *   rate      {number}  Speech rate (default 0.85).
  */
 export default function TTSButton({
   text,
-  label = 'Read aloud',
+  label     = 'Read aloud',
   className = '',
-  size = 'md',
-  rate = 0.85,
+  size      = 'md',
+  rate      = 0.85,
 }) {
   const [speaking, setSpeaking] = useState(false);
+  const safetyRef = useRef(null);
 
-  // Reset speaking indicator if component unmounts while speaking
+  const done = () => {
+    setSpeaking(false);
+    if (safetyRef.current) {
+      clearTimeout(safetyRef.current);
+      safetyRef.current = null;
+    }
+  };
+
+  // Stop & reset if component unmounts while speaking
   useEffect(() => {
     return () => {
-      if (speaking) SpeechService.stop();
+      SpeechService.stop();
+      if (safetyRef.current) clearTimeout(safetyRef.current);
     };
-  }, [speaking]);
+  }, []);
 
   if (!SpeechService.isSupported()) return null;
 
   const handleClick = (e) => {
     e.stopPropagation();
+
     if (speaking) {
       SpeechService.stop();
-      setSpeaking(false);
-    } else {
-      setSpeaking(true);
-      SpeechService.speak(text, {
-        rate,
-        onEnd: () => setSpeaking(false),
-      });
+      done();
+      return;
     }
+
+    if (!text?.toString().trim()) return;
+
+    setSpeaking(true);
+    SpeechService.speak(text, { rate, onEnd: done });
+
+    // Failsafe: if onEnd never fires (platform silently discards utterance),
+    // reset after 30 s so the button is never permanently stuck.
+    safetyRef.current = setTimeout(done, 30_000);
   };
 
   return (

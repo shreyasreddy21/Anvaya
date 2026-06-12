@@ -91,26 +91,14 @@ const TherapistDashboard = () => {
 
   const therapistId = localStorage.getItem("therapistId");
   const navigate = useNavigate();
- useEffect(() => {
-    // Enable scrolling when this page is open
+  useEffect(() => {
     document.body.style.overflow = "auto";
-  
-    // When leaving this page, disable scrolling again
-    return () => {
-      document.body.style.overflow = "hidden";
-    };
+    return () => { document.body.style.overflow = ""; };
   }, []);
   useEffect(() => {
     const fetchChildren = async () => {
-      if (!therapistId) {
-        setError('Therapist ID is missing. Please log in again.');
-        setChildrenLoading(false);
-        return;
-      }
       try {
-        const response = await axios.get(`${API_BASE}/api/children`, {
-          headers: { 'therapist-id': therapistId }
-        });
+        const response = await axios.get(`${API_BASE}/api/children`);
         setChildren(response.data);
       } catch (err) {
         setError('Failed to fetch patient list. Please refresh the page.');
@@ -118,9 +106,8 @@ const TherapistDashboard = () => {
         setChildrenLoading(false);
       }
     };
-
     fetchChildren();
-  }, [therapistId]);
+  }, []);
 
   const handleViewDetails = async (username) => {
     setSelectedUsername(username);
@@ -129,11 +116,11 @@ const TherapistDashboard = () => {
     try {
       const [sessionsRes, ptRes, lsRes, clRes, ranRes, vmRes] = await Promise.all([
         axios.get(`${API_BASE}/api/sessions?username=${username}`),
-        axios.get(`/api/phoneme-tap?username=${username}`),
-        axios.get(`/api/letter-sound?username=${username}`),
-        axios.get(`/api/confusable-letter?username=${username}`),
-        axios.get(`/api/ran?username=${username}`),
-        axios.get(`/api/verbal-memory?username=${username}`),
+        axios.get(`${API_BASE}/api/phoneme-tap?username=${username}`),
+        axios.get(`${API_BASE}/api/letter-sound?username=${username}`),
+        axios.get(`${API_BASE}/api/confusable-letter?username=${username}`),
+        axios.get(`${API_BASE}/api/ran?username=${username}`),
+        axios.get(`${API_BASE}/api/verbal-memory?username=${username}`),
       ]);
       setSelectedChildSessions(sessionsRes.data);
       setPhonemeTapSessions(ptRes.data);
@@ -145,9 +132,9 @@ const TherapistDashboard = () => {
       // Additional analytics + progression + adaptation
       try {
         const [analyticsRes, rpRes, alRes] = await Promise.all([
-          axios.get(`/api/analytics/${username}`),
-          axios.get(`/api/reading-progress/${username}`),
-          axios.get(`/api/adaptation-log?username=${username}&limit=20`),
+          axios.get(`${API_BASE}/api/analytics/${username}`),
+          axios.get(`${API_BASE}/api/reading-progress/${username}`),
+          axios.get(`${API_BASE}/api/adaptation-log?username=${username}&limit=20`),
         ]);
         setAnalyticsData(analyticsRes.data);
         setReadingProgress(rpRes.data);
@@ -177,19 +164,16 @@ const TherapistDashboard = () => {
         therapistId,
       });
 
-      setChildren(prev => [...prev, response.data]);
+      setChildren(prev => [...prev, response.data.child]);
 
       setChild({ name: "", username: "", password: "" });
       setShowAddChildForm(false);
-      setSuccessMessage("Child added successfully!"); // Show success message
+      setSuccessMessage("Child added successfully!");
 
-      // Hide success message after 3 seconds
-      setTimeout(() => {
-      setSuccessMessage('');
-    }, 3000);
-  } catch (err) {
-    setError(err.response?.data?.message || "Failed to add child.");
-  }
+      setTimeout(() => { setSuccessMessage(''); }, 3000);
+    } catch (err) {
+      setError(err.response?.data?.error || err.response?.data?.message || "Failed to add child.");
+    }
   };
 
   const handleAssignSession = async (e) => {
@@ -205,7 +189,7 @@ const TherapistDashboard = () => {
         gameKey: key, order: idx + 1, difficulty: assignForm[`diff_${key}`] || 'medium',
         durationMin: parseInt(assignForm[`dur_${key}`] || '10', 10),
       }));
-      await axios.post('/api/assigned-sessions', {
+      await axios.post(`${API_BASE}/api/assigned-sessions`, {
         therapistId,
         childUsername: assignSessionChild,
         date: assignForm.date,
@@ -223,10 +207,10 @@ const TherapistDashboard = () => {
     setOverrideMsg('');
     if (!overrideLevel) return;
     try {
-      await axios.patch(`/api/reading-progress/${childUsername}/override`, {
+      await axios.patch(`${API_BASE}/api/reading-progress/${childUsername}/override`, {
         level: overrideLevel, therapistId, note: overrideNote,
       });
-      const rpRes = await axios.get(`/api/reading-progress/${childUsername}`);
+      const rpRes = await axios.get(`${API_BASE}/api/reading-progress/${childUsername}`);
       setReadingProgress(rpRes.data);
       setOverrideMsg('Level updated.');
     } catch (err) {
@@ -237,10 +221,10 @@ const TherapistDashboard = () => {
   const handleCheckAdvancement = async (childUsername) => {
     setOverrideMsg('');
     try {
-      const res = await axios.post(`/api/reading-progress/${childUsername}/check`);
+      const res = await axios.post(`${API_BASE}/api/reading-progress/${childUsername}/check`);
       if (res.data.advanced) {
         setOverrideMsg(`Advanced to ${res.data.newLevel}! (avg accuracy ${res.data.avgAccuracy}%)`);
-        const rpRes = await axios.get(`/api/reading-progress/${childUsername}`);
+        const rpRes = await axios.get(`${API_BASE}/api/reading-progress/${childUsername}`);
         setReadingProgress(rpRes.data);
       } else {
         const reasons = {

@@ -3,6 +3,7 @@ import confetti from 'canvas-confetti';
 import './RANGame.css';
 import useEmotionDetection from '../hooks/useEmotionDetection';
 import useGameSessionLogger from '../hooks/useGameSessionLogger';
+import GameShell from '../components/GameShell';
 import axios from 'axios';
 import { API_BASE } from '../config/api';
 
@@ -60,23 +61,23 @@ function getOptions(correct, pool) {
 }
 
 export default function RANGame() {
-  const { emotion, videoRef, canvasRef } = useEmotionDetection();
+  const { emotion, confidence, videoRef, canvasRef } = useEmotionDetection();
 
   const [category,   setCategory]   = useState('letters');
   const [difficulty, setDifficulty] = useState('easy');
 
-  const [gameState,  setGameState]  = useState('setup');   // setup | countdown | playing | done
+  const [gameState,  setGameState]  = useState('setup');
   const [countdown,  setCountdown]  = useState(3);
   const [sequence,   setSequence]   = useState([]);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [options,    setOptions]    = useState([]);
   const [items,      setItems]      = useState([]);
-  const [elapsed,    setElapsed]    = useState(0);          // ms
-  const [flash,      setFlash]      = useState(null);       // 'correct' | 'wrong' | null
+  const [elapsed,    setElapsed]    = useState(0);
+  const [flash,      setFlash]      = useState(null);
   const [score,      setScore]      = useState(0);
 
-  const timerRef       = useRef(null);
-  const itemStartRef   = useRef(null);
+  const timerRef        = useRef(null);
+  const itemStartRef    = useRef(null);
   const sessionStartRef = useRef(null);
   const username = localStorage.getItem('username');
   const { endSession } = useGameSessionLogger({ username, difficulty, expression: emotion, score });
@@ -94,7 +95,6 @@ export default function RANGame() {
     setGameState('countdown');
   }, []);
 
-  // Countdown effect
   useEffect(() => {
     if (gameState !== 'countdown') return;
     if (countdown === 0) {
@@ -107,7 +107,6 @@ export default function RANGame() {
     return () => clearTimeout(t);
   }, [gameState, countdown]);
 
-  // Live timer while playing
   useEffect(() => {
     if (gameState !== 'playing') return;
     timerRef.current = setInterval(() => setElapsed(e => e + 100), 100);
@@ -139,10 +138,8 @@ export default function RANGame() {
     };
 
     if (correct) {
-      // Immediate advance for correct
       advance();
     } else {
-      // Brief flash then advance
       setTimeout(advance, 600);
     }
   };
@@ -193,54 +190,60 @@ export default function RANGame() {
   const currentItem = sequence[currentIdx];
   const elapsedSec  = (elapsed / 1000).toFixed(1);
 
-  // ── Setup ──────────────────────────────────────────────────────────────
+
   if (gameState === 'setup') {
     return (
-      <div className="ran-container">
-        <div className="ran-card" style={cardStyle}>
-          <h1 className="ran-title">Rapid Naming</h1>
-          <p className="ran-intro">Name as many items as you can — as fast as possible!</p>
+      <GameShell title="Rapid Naming" emotion={emotion} confidence={confidence}>
+        <div className="ran-container">
+          <div className="ran-card" style={cardStyle}>
+            <h1 className="ran-title">Rapid Naming</h1>
+            <p className="ran-intro">Name as many items as you can — as fast as possible!</p>
 
-          <div className="ran-controls">
-            <div className="ran-select-group">
-              <label htmlFor="ran-cat">Category:</label>
-              <select id="ran-cat" value={category} onChange={e => setCategory(e.target.value)}>
-                <option value="letters">🔤 Letters</option>
-                <option value="numbers">🔢 Numbers</option>
-                <option value="colors">🎨 Colors</option>
-              </select>
+            <div className="ran-controls">
+              <div className="ran-select-group">
+                <label htmlFor="ran-cat">Category:</label>
+                <select id="ran-cat" value={category} onChange={e => setCategory(e.target.value)}>
+                  <option value="letters">🔤 Letters</option>
+                  <option value="numbers">🔢 Numbers</option>
+                  <option value="colors">🎨 Colors</option>
+                </select>
+              </div>
+              <div className="ran-select-group">
+                <label htmlFor="ran-diff">Difficulty:</label>
+                <select id="ran-diff" value={difficulty} onChange={e => setDifficulty(e.target.value)}>
+                  <option value="easy">🟢 Easy (10 items)</option>
+                  <option value="medium">🟡 Medium (20 items)</option>
+                  <option value="hard">🔴 Hard (30 items)</option>
+                </select>
+              </div>
             </div>
-            <div className="ran-select-group">
-              <label htmlFor="ran-diff">Difficulty:</label>
-              <select id="ran-diff" value={difficulty} onChange={e => setDifficulty(e.target.value)}>
-                <option value="easy">🟢 Easy (10 items)</option>
-                <option value="medium">🟡 Medium (20 items)</option>
-                <option value="hard">🔴 Hard (30 items)</option>
-              </select>
-            </div>
+
+            <button className="ran-btn ran-btn--go" onClick={() => startRound(category, difficulty)}>
+              Start!
+            </button>
           </div>
-
-          <button className="ran-btn ran-btn--go" onClick={() => startRound(category, difficulty)}>
-            Start!
-          </button>
         </div>
-      </div>
+        <video  ref={videoRef}  autoPlay style={{ display: 'none' }} />
+        <canvas ref={canvasRef} width={640} height={480} style={{ display: 'none' }} />
+      </GameShell>
     );
   }
 
-  // ── Countdown ──────────────────────────────────────────────────────────
   if (gameState === 'countdown') {
     return (
-      <div className="ran-container">
-        <div className="ran-card" style={cardStyle}>
-          <h1 className="ran-title">Get ready…</h1>
-          <div className="ran-countdown">{countdown === 0 ? 'Go!' : countdown}</div>
+      <GameShell title="Rapid Naming" emotion={emotion} confidence={confidence}>
+        <div className="ran-container">
+          <div className="ran-card" style={cardStyle}>
+            <h1 className="ran-title">Get ready…</h1>
+            <div className="ran-countdown">{countdown === 0 ? 'Go!' : countdown}</div>
+          </div>
         </div>
-      </div>
+        <video  ref={videoRef}  autoPlay style={{ display: 'none' }} />
+        <canvas ref={canvasRef} width={640} height={480} style={{ display: 'none' }} />
+      </GameShell>
     );
   }
 
-  // ── Done ───────────────────────────────────────────────────────────────
   if (gameState === 'done') {
     const totalMs  = items.reduce((s, i) => s + i.timeMs, 0);
     const correct  = items.filter(i => i.correct).length;
@@ -248,107 +251,107 @@ export default function RANGame() {
     const ipm      = items.length ? Math.round((items.length / totalMs) * 60000) : 0;
 
     return (
-      <div className="ran-container">
-        <div className="ran-card" style={cardStyle}>
-          <h1 className="ran-title">Rapid Naming</h1>
-          <div className="ran-summary">
-            <h2>Round complete! ⚡</h2>
-            <div className="ran-stats-grid">
-              <div className="ran-stat-box">
-                <span className="ran-stat-val">{(totalMs / 1000).toFixed(1)}s</span>
-                <span className="ran-stat-lbl">Total time</span>
+      <GameShell title="Rapid Naming" emotion={emotion} confidence={confidence}>
+        <div className="ran-container">
+          <div className="ran-card" style={cardStyle}>
+            <h1 className="ran-title">Rapid Naming</h1>
+            <div className="ran-summary">
+              <h2>Round complete! ⚡</h2>
+              <div className="ran-stats-grid">
+                <div className="ran-stat-box">
+                  <span className="ran-stat-val">{(totalMs / 1000).toFixed(1)}s</span>
+                  <span className="ran-stat-lbl">Total time</span>
+                </div>
+                <div className="ran-stat-box">
+                  <span className="ran-stat-val">{ipm}</span>
+                  <span className="ran-stat-lbl">Items / min</span>
+                </div>
+                <div className="ran-stat-box">
+                  <span className="ran-stat-val"
+                    style={{ color: accuracy >= 70 ? '#166534' : '#991b1b' }}>{accuracy}%</span>
+                  <span className="ran-stat-lbl">Accuracy</span>
+                </div>
+                <div className="ran-stat-box">
+                  <span className="ran-stat-val">{score}</span>
+                  <span className="ran-stat-lbl">Score</span>
+                </div>
               </div>
-              <div className="ran-stat-box">
-                <span className="ran-stat-val">{ipm}</span>
-                <span className="ran-stat-lbl">Items / min</span>
-              </div>
-              <div className="ran-stat-box">
-                <span className="ran-stat-val"
-                  style={{ color: accuracy >= 70 ? '#166534' : '#991b1b' }}>{accuracy}%</span>
-                <span className="ran-stat-lbl">Accuracy</span>
-              </div>
-              <div className="ran-stat-box">
-                <span className="ran-stat-val">{score}</span>
-                <span className="ran-stat-lbl">Score</span>
-              </div>
-            </div>
 
-            <details className="ran-details">
-              <summary>Item-by-item results</summary>
-              <div className="ran-results-list">
-                {items.map((it, i) => (
-                  <div key={i} className={`ran-result-row ${it.correct ? 'correct' : 'wrong'}`}>
-                    {category === 'colors'
-                      ? <span className="ran-result-swatch"
-                          style={{ background: COLOR_HEX[it.item] || '#999' }} />
-                      : <span className="ran-result-item">{it.item}</span>}
-                    <span className="ran-result-ans">
-                      {it.correct ? '✅' : `❌ → ${it.selected}`}
-                    </span>
-                    <span className="ran-result-time">{(it.timeMs / 1000).toFixed(2)}s</span>
-                  </div>
-                ))}
-              </div>
-            </details>
+              <details className="ran-details">
+                <summary>Item-by-item results</summary>
+                <div className="ran-results-list">
+                  {items.map((it, i) => (
+                    <div key={i} className={`ran-result-row ${it.correct ? 'correct' : 'wrong'}`}>
+                      {category === 'colors'
+                        ? <span className="ran-result-swatch"
+                            style={{ background: COLOR_HEX[it.item] || '#999' }} />
+                        : <span className="ran-result-item">{it.item}</span>}
+                      <span className="ran-result-ans">
+                        {it.correct ? '✅' : `❌ → ${it.selected}`}
+                      </span>
+                      <span className="ran-result-time">{(it.timeMs / 1000).toFixed(2)}s</span>
+                    </div>
+                  ))}
+                </div>
+              </details>
 
-            <div className="ran-replay-row">
-              <button className="ran-btn ran-btn--primary"
-                onClick={() => startRound(category, difficulty)}>
-                Play Again
-              </button>
-              <button className="ran-btn ran-btn--secondary"
-                onClick={() => setGameState('setup')}>
-                Change Settings
-              </button>
+              <div className="ran-replay-row">
+                <button className="ran-btn ran-btn--primary"
+                  onClick={() => startRound(category, difficulty)}>
+                  Play Again
+                </button>
+                <button className="ran-btn ran-btn--secondary"
+                  onClick={() => setGameState('setup')}>
+                  Change Settings
+                </button>
+              </div>
             </div>
           </div>
         </div>
         <video  ref={videoRef}  autoPlay style={{ display: 'none' }} />
         <canvas ref={canvasRef} width={640} height={480} style={{ display: 'none' }} />
-      </div>
+      </GameShell>
     );
   }
 
   // ── Playing ────────────────────────────────────────────────────────────
   return (
-    <div className="ran-container">
-      <div className="ran-card" style={cardStyle}>
-        <div className="ran-hud">
-          <span className="ran-hud-item">⚡ {elapsedSec}s</span>
-          <span className="ran-hud-item">{currentIdx + 1} / {sequence.length}</span>
-          <span className="ran-hud-item">⭐ {score}</span>
-        </div>
+    <GameShell title="Rapid Naming" emotion={emotion} confidence={confidence}>
+      <div className="ran-container">
+        <div className="ran-card" style={cardStyle}>
+          <div className="ran-hud">
+            <span className="ran-hud-item">⚡ {elapsedSec}s</span>
+            <span className="ran-hud-item">{currentIdx + 1} / {sequence.length}</span>
+            <span className="ran-hud-item">⭐ {score}</span>
+          </div>
 
-        {/* Progress bar */}
-        <div className="ran-progress-bar">
-          <div className="ran-progress-fill"
-            style={{ width: `${((currentIdx) / sequence.length) * 100}%` }} />
-        </div>
+          <div className="ran-progress-bar">
+            <div className="ran-progress-fill"
+              style={{ width: `${(currentIdx / sequence.length) * 100}%` }} />
+          </div>
 
-        {/* Item display */}
-        <div className={`ran-item-display ${flash ? `ran-flash--${flash}` : ''}`}>
-          {category === 'colors' ? (
-            <div className="ran-color-swatch"
-              style={{ background: COLOR_HEX[currentItem] || '#999' }} />
-          ) : (
-            <span className="ran-item-letter">{currentItem}</span>
-          )}
-        </div>
+          <div className={`ran-item-display ${flash ? `ran-flash--${flash}` : ''}`}>
+            {category === 'colors' ? (
+              <div className="ran-color-swatch"
+                style={{ background: COLOR_HEX[currentItem] || '#999' }} />
+            ) : (
+              <span className="ran-item-letter">{currentItem}</span>
+            )}
+          </div>
 
-        {/* Options */}
-        <div className="ran-options">
-          {options.map(opt => (
-            <button key={opt} className="ran-option"
-              onClick={() => handleSelect(opt)}
-              disabled={flash !== null}>
-              {opt}
-            </button>
-          ))}
+          <div className="ran-options">
+            {options.map(opt => (
+              <button key={opt} className="ran-option"
+                onClick={() => handleSelect(opt)}
+                disabled={flash !== null}>
+                {opt}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
-
       <video  ref={videoRef}  autoPlay style={{ display: 'none' }} />
       <canvas ref={canvasRef} width={640} height={480} style={{ display: 'none' }} />
-    </div>
+    </GameShell>
   );
 }

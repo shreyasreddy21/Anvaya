@@ -1,46 +1,28 @@
 /**
- * SpeechService — thin wrapper around the browser Web Speech API.
+ * SpeechService — Web Speech API wrapper.
  *
- * Fixes:
- *  1. Chrome cancel+speak race: 50 ms delay after cancel().
- *  2. Async voice loading: waits for voiceschanged, with a 2 s hard fallback
- *     so the button never stays permanently silent (critical on Linux/Firefox
- *     where voiceschanged may fire late or not at all with speech-dispatcher).
- *  3. Voice selection: prefers a non-local English voice, falls back to any
- *     English voice, then any voice.
+ * Design principles:
+ *  - Never block speech on voice loading state.  Speak immediately and let
+ *    the browser use its default voice if no named voice is resolved.
+ *  - Wrap every speechSynthesis call in try/catch; Chrome on Linux throws
+ *    silently when speech-dispatcher is unconfigured.
+ *  - 100 ms delay after cancel() is enough for Chrome's async cancel to settle.
+ *  - Expose onError callback so callers can reset UI even when the utterance
+ *    is silently discarded by the platform.
  */
 
-let _voicesReady = false;
-let _voiceLoadCallbacks = [];
-
-function _flushCallbacks() {
-  _voicesReady = true;
-  _voiceLoadCallbacks.forEach(fn => fn());
-  _voiceLoadCallbacks = [];
-}
-
-if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-  const voices = window.speechSynthesis.getVoices();
-  if (voices.length > 0) {
-    _voicesReady = true;
-  } else {
-    // Primary: event-driven
-    window.speechSynthesis.addEventListener('voiceschanged', _flushCallbacks, { once: true });
-    // Fallback: force-ready after 2 s so TTS is never permanently blocked
-    setTimeout(() => {
-      if (!_voicesReady) _flushCallbacks();
-    }, 2000);
+function _pickVoice(langPrefix) {
+  try {
+    const voices = window.speechSynthesis.getVoices();
+    if (!voices.length) return null;
+    return (
+      voices.find(v => v.lang.startsWith(langPrefix) && !v.localService) ||
+      voices.find(v => v.lang.startsWith(langPrefix)) ||
+      voices[0]
+    );
+  } catch (_) {
+    return null;
   }
-}
-
-function _pickVoice(lang) {
-  const voices = window.speechSynthesis.getVoices();
-  return (
-    voices.find(v => v.lang.startsWith(lang) && !v.localService) ||
-    voices.find(v => v.lang.startsWith(lang)) ||
-    voices[0] ||
-    null
-  );
 }
 
 const SpeechService = {
@@ -48,37 +30,71 @@ const SpeechService = {
     return typeof window !== 'undefined' && 'speechSynthesis' in window;
   },
 
+  /**
+   * Speak text aloud.
+   * @param {string}   text
+   * @param {object}   opts
+   * @param {number}   opts.rate    — speech rate (default 0.85)
+   * @param {number}   opts.pitch   — pitch (default 1)
+   * @param {string}   opts.lang    — BCP-47 lang tag (default 'en-US')
+   * @param {function} opts.onEnd   — called when utterance ends (or on error)
+   */
   speak(text, { rate = 0.85, pitch = 1, lang = 'en-US', onEnd } = {}) {
-    if (!this.isSupported() || !text) return;
-    window.speechSynthesis.cancel();
+    if (!this.isSupported() || !text?.toString().trim()) {
+      onEnd?.();
+      return;
+    }
+
+    const cleanText = String(text).trim();
+    try { window.speechSynthesis.cancel(); } catch (_) {}
 
     const _doSpeak = () => {
-      const utterance    = new SpeechSynthesisUtterance(text);
-      utterance.rate     = rate;
-      utterance.pitch    = pitch;
-      utterance.lang     = lang;
-      const voice        = _pickVoice(lang.slice(0, 2));
-      if (voice) utterance.voice = voice;
-      if (onEnd) utterance.onend = onEnd;
-      window.speechSynthesis.speak(utterance);
+      try {
+        const utt = new SpeechSynthesisUtterance(cleanText);
+        utt.rate  = rate;
+        utt.pitch = pitch;
+        utt.lang  = lang;
+        utt.onend   = () => onEnd?.();
+        utt.onerror = () => onEnd?.();
+        const voice = _pickVoice(lang.slice(0, 2));
+        if (voice) utt.voice = voice;
+        window.speechSynthesis.speak(utt);
+      } catch (err) {
+        console.warn('[TTS] speak failed:', err.message ?? err);
+        onEnd?.();
+      }
     };
 
-    // 50 ms delay ensures Chrome's async cancel() completes before we enqueue
-    if (_voicesReady) {
-      setTimeout(_doSpeak, 50);
+    // Chrome bug: getVoices() returns [] until onvoiceschanged fires.
+    // Wait for voices with a 1.5 s fallback that speaks anyway (browser uses default).
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length > 0) {
+      setTimeout(_doSpeak, 100);
     } else {
-      _voiceLoadCallbacks.push(() => setTimeout(_doSpeak, 50));
+      let fired = false;
+      const fallback = setTimeout(() => {
+        if (!fired) { fired = true; setTimeout(_doSpeak, 100); }
+      }, 1500);
+      const prev = window.speechSynthesis.onvoiceschanged;
+      window.speechSynthesis.onvoiceschanged = () => {
+        if (!fired) {
+          fired = true;
+          clearTimeout(fallback);
+          window.speechSynthesis.onvoiceschanged = prev ?? null;
+          setTimeout(_doSpeak, 100);
+        }
+      };
     }
   },
 
   stop() {
     if (!this.isSupported()) return;
-    window.speechSynthesis.cancel();
+    try { window.speechSynthesis.cancel(); } catch (_) {}
   },
 
   isSpeaking() {
     if (!this.isSupported()) return false;
-    return window.speechSynthesis.speaking;
+    try { return window.speechSynthesis.speaking; } catch (_) { return false; }
   },
 };
 

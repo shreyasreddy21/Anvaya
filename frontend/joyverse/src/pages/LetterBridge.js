@@ -4,13 +4,15 @@ import './LetterBridge.css';
 import useEmotionDetection from "../hooks/useEmotionDetection";
 import useGameSessionLogger from "../hooks/useGameSessionLogger";
 import TTSButton from "../components/TTSButton";
+import GameShell from "../components/GameShell";
 import PhonicsContentService from "../services/PhonicsContentService";
 import { PHONICS_LEVEL_ORDER, PhonicsLevelMeta } from "../constants/PhonicsLevel";
+import { getCardStyle } from '../utils/EmotionThemeMap';
 
 const GAME_DURATION = 60;
 
 const LetterBridge = () => {
-  const { emotion, videoRef, canvasRef } = useEmotionDetection();
+  const { emotion, confidence, videoRef, canvasRef } = useEmotionDetection();
 
   const [phonicsLevel, setPhonicsLevel] = useState('CVC');
   const [difficulty, setDifficulty]     = useState('easy');
@@ -26,6 +28,8 @@ const LetterBridge = () => {
   const [gameOver, setGameOver]         = useState(false);
   const [loading, setLoading]           = useState(false);
   const [loadError, setLoadError]       = useState('');
+
+  const cardStyle = getCardStyle(emotion);
 
   const wrapperRef  = useRef(null);
   const letterRefs  = useRef({});
@@ -124,25 +128,9 @@ const LetterBridge = () => {
 
   const handleRestart = () => { initializeGame(phonicsLevel, difficulty); };
 
-  const getEmotionStyles = (em) => {
-    switch (em) {
-      case "Happy":   return { backgroundColor: "#F8FD89", color: "#333333" };
-      case "Sad":     return { backgroundColor: "#D8FAD2", color: "#3B2F2F" };
-      case "Angry":   return { backgroundColor: "#A5F7E1", color: "#223344" };
-      case "Surprise":return { backgroundColor: "#FFDAB9", color: "#4B0082" };
-      default:        return { backgroundColor: "#F9F9F3", color: "#2C2C2C" };
-    }
-  };
-
-  const emotionStyles = getEmotionStyles(emotion);
-
   return (
-    <div className="game-card" style={{
-      backgroundColor: emotionStyles.backgroundColor,
-      color:           emotionStyles.color,
-      '--text-color':  emotionStyles.color,
-    }}>
-      <h1 className="game-title">Letter Bridging Game</h1>
+    <GameShell title="Letter Bridging" emotion={emotion} confidence={confidence}>
+    <div className="game-card" style={cardStyle}>
       <div className="tts-inline" style={{ justifyContent: "center", marginBottom: "6px" }}>
         <p className="game-instructions" style={{ margin: 0 }}>
           Tap one letter from each column, left to right, to form a valid word!
@@ -230,6 +218,7 @@ const LetterBridge = () => {
       <video  ref={videoRef}  autoPlay style={{ display: "none" }} />
       <canvas ref={canvasRef} width={640} height={480} style={{ display: "none" }} />
     </div>
+    </GameShell>
   );
 };
 
