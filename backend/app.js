@@ -27,6 +27,9 @@ import readingProgressRoutes  from './Routes/readingProgress.js';
 import adaptationLogRoutes    from './Routes/adaptationLog.js';
 import analyticsRoutes        from './Routes/analytics.js';
 import reportsRoutes          from './Routes/reports.js';
+import fluencyRoutes          from './Routes/fluency.js';
+import sightWordsRoutes       from './Routes/sightWords.js';
+import morphologyRoutes       from './Routes/morphology.js';
 
 // ── Startup guard ────────────────────────────────────────────────────────────
 if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
@@ -145,6 +148,9 @@ app.use('/api/letter-sound',        letterSoundRoutes);
 app.use('/api/confusable-letter',   confusableLetterRoutes);
 app.use('/api/ran',                 ranRoutes);
 app.use('/api/verbal-memory',       verbalMemoryRoutes);
+app.use('/api/fluency',             fluencyRoutes);
+app.use('/api/sight-words',         sightWordsRoutes);
+app.use('/api/morphology',          morphologyRoutes);
 app.use('/api/adaptation-log',      adaptationLogRoutes);
 app.use('/api/assigned-sessions',   assignedSessionsRoutes);
 

@@ -33,6 +33,9 @@ const ALL_GAMES = [
   { key: 'confusableletter',    label: 'Letter Trainer',      route: '/confusableletter',    image: null, emoji: '🔡', cssClass: 'games-page-confusable-game'     },
   { key: 'ran',                 label: 'Rapid Naming',        route: '/ran',                 image: null, emoji: '⚡', cssClass: 'games-page-ran-game'            },
   { key: 'verbalmemory',        label: 'Sequence Memory',     route: '/verbalmemory',        image: null, emoji: '🧠', cssClass: 'games-page-verbalmemory-game'   },
+  { key: 'readingfluency',     label: 'Reading Fluency',     route: '/reading-fluency',     image: null, emoji: '📖', cssClass: 'games-page-verbalmemory-game'   },
+  { key: 'sightword',          label: 'Sight Words',         route: '/sight-words',         image: null, emoji: '📝', cssClass: 'games-page-lettersound-game'    },
+  { key: 'morphology',         label: 'Word Builder',        route: '/morphology-builder',  image: null, emoji: '🧩', cssClass: 'games-page-confusable-game'     },
 ];
 
 const ACTIVE_GAMES = ALL_GAMES.filter(g => !isDeprecated(g.key));

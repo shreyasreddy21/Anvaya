@@ -2,9 +2,13 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
+import SpeechService from './services/SpeechService';
 import reportWebVitals from './reportWebVitals';
 import "./pages/global.css";
 import axios from 'axios';
+
+// Pre-warm TTS voices early so first speak() call has them ready
+SpeechService.init();
 
 // Attach JWT to every outgoing request
 axios.interceptors.request.use(config => {

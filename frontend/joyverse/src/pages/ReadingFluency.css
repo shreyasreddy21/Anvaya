@@ -1,0 +1,258 @@
+/* ── ReadingFluency ──────────────────────────────────────────────────────── */
+
+.rf-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  min-height: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.rf-setup-intro {
+  font-size: 1rem;
+  color: #374151;
+  font-family: var(--font-opendyslexic, sans-serif);
+  margin: 0;
+  text-align: center;
+}
+
+/* Passage selection grid */
+.rf-passage-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+  width: 100%;
+}
+
+.rf-passage-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-opendyslexic, sans-serif);
+}
+.rf-passage-card:hover {
+  background: rgba(99, 102, 241, 0.08);
+  border-color: rgba(99, 102, 241, 0.4);
+  transform: translateY(-2px);
+}
+.rf-passage-card--selected {
+  border: 2px solid #6366f1;
+  background: rgba(99, 102, 241, 0.1);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+
+.rf-pc-title {
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: #1e1b4b;
+}
+.rf-pc-level {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #6366f1;
+}
+.rf-pc-meta {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.rf-mode-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Listen / reading card */
+.rf-listen-card {
+  max-width: 740px !important;
+}
+
+.rf-passage-heading {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #1e1b4b;
+  font-family: var(--font-opendyslexic, sans-serif);
+  margin: 0;
+  text-align: center;
+}
+
+/* Passage text with per-word spans */
+.rf-passage {
+  width: 100%;
+  line-height: 2.1;
+  font-size: 1.1rem;
+  font-family: var(--font-opendyslexic, sans-serif);
+  color: #1f2937;
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: 16px;
+  padding: 16px 20px;
+  box-sizing: border-box;
+}
+
+.rf-passage--review {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.rf-word {
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: background 0.25s ease, color 0.25s ease, opacity 0.25s ease;
+  display: inline;
+}
+
+.rf-word--active {
+  background: #6366f1;
+  color: #fff;
+  border-radius: 5px;
+}
+
+.rf-word--done {
+  opacity: 0.45;
+}
+
+.rf-word--correct {
+  background: rgba(16, 185, 129, 0.25);
+  color: #065f46;
+}
+
+.rf-word--missed {
+  background: rgba(239, 68, 68, 0.2);
+  color: #7f1d1d;
+}
+
+/* Controls row */
+.rf-listen-controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* SR hint */
+.rf-sr-hint {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #374151;
+  font-family: var(--font-opendyslexic, sans-serif);
+  margin: 0;
+  text-align: center;
+}
+
+.rf-no-sr {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1.5px solid rgba(245, 158, 11, 0.3);
+  border-radius: 14px;
+  padding: 14px 18px;
+  font-size: 0.9rem;
+  color: #78350f;
+  font-family: var(--font-opendyslexic, sans-serif);
+  text-align: center;
+}
+
+.rf-timer-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  justify-content: center;
+  font-family: var(--font-opendyslexic, sans-serif);
+}
+
+.rf-timer {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #dc2626;
+}
+
+.rf-recog-count {
+  font-size: 0.9rem;
+  color: #059669;
+  font-weight: 600;
+}
+
+/* Results */
+.rf-results-stats {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.rf-stat-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.rf-wpm-display {
+  font-size: 4rem;
+  font-weight: 900;
+  color: #6366f1;
+  line-height: 1;
+  font-family: var(--font-opendyslexic, sans-serif);
+}
+
+.rf-accuracy-display {
+  font-size: 4rem;
+  font-weight: 900;
+  color: #10b981;
+  line-height: 1;
+  font-family: var(--font-opendyslexic, sans-serif);
+}
+
+.rf-stat-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #6b7280;
+  font-family: var(--font-opendyslexic, sans-serif);
+}
+
+.rf-encouragement {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1e1b4b;
+  font-family: var(--font-opendyslexic, sans-serif);
+  text-align: center;
+  margin: 0;
+}
+
+.rf-target-note {
+  font-size: 0.85rem;
+  color: #6b7280;
+  font-family: var(--font-opendyslexic, sans-serif);
+  margin: 0;
+}
+
+.rf-missed-section {
+  width: 100%;
+}
+
+.rf-missed-label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #991b1b;
+  font-family: var(--font-opendyslexic, sans-serif);
+  margin: 0 0 8px 0;
+  text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .rf-passage-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .rf-wpm-display,
+  .rf-accuracy-display {
+    font-size: 3rem;
+  }
+}

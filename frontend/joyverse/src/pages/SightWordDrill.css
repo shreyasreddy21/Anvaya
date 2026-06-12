@@ -1,0 +1,152 @@
+/* ── SightWordDrill ──────────────────────────────────────────────────────── */
+
+.swd-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Setup phase */
+.swd-instruction {
+  font-size: 1rem;
+  color: #374151;
+  text-align: center;
+  margin: 0;
+  max-width: 480px;
+  line-height: 1.6;
+  font-family: var(--font-opendyslexic, sans-serif);
+}
+
+.swd-setup-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.swd-label {
+  font-weight: 700;
+  color: #374151;
+  font-size: 0.95rem;
+  font-family: var(--font-opendyslexic, sans-serif);
+}
+
+.swd-select {
+  padding: 10px 16px;
+  border-radius: 50px;
+  border: 1.5px solid rgba(0, 0, 0, 0.2);
+  font-family: var(--font-opendyslexic, sans-serif);
+  font-size: 0.95rem;
+  background: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  outline: none;
+}
+.swd-select:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.swd-wordcount {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0;
+  font-family: var(--font-opendyslexic, sans-serif);
+}
+
+/* Drill phase */
+.swd-progress {
+  font-size: 0.9rem;
+  color: #6b7280;
+  font-weight: 600;
+  margin: 0;
+  font-family: var(--font-opendyslexic, sans-serif);
+}
+
+.swd-word-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 0;
+}
+
+.swd-word {
+  font-size: clamp(3rem, 8vw, 6rem);
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  color: #1e1b4b;
+  font-family: var(--font-opendyslexic, sans-serif);
+  display: block;
+  text-align: center;
+  line-height: 1.1;
+  transition: opacity 0.3s ease;
+  user-select: none;
+}
+
+.swd-replay-btn {
+  padding: 8px 16px !important;
+  font-size: 1.2rem !important;
+  border-radius: 50px !important;
+}
+
+.swd-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Done phase */
+.swd-need-more {
+  width: 100%;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1.5px solid rgba(239, 68, 68, 0.25);
+  border-radius: 16px;
+  padding: 16px 20px;
+  text-align: center;
+}
+
+.swd-need-more__title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #7f1d1d;
+  margin: 0 0 10px 0;
+  font-family: var(--font-opendyslexic, sans-serif);
+}
+
+.swd-need-more__words {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.swd-chip {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 50px;
+  padding: 4px 12px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #991b1b;
+  font-family: var(--font-opendyslexic, sans-serif);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .swd-action-row {
+    flex-direction: column;
+    width: 100%;
+  }
+  .swd-action-row .gs-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

@@ -307,3 +307,26 @@
   .mood-label { font-size: 0.78rem; }
   .startplayingbutton { min-width: 220px; height: 60px; }
 }
+
+/* ── Achievements button ─────────────────────────────────────────────────── */
+.welcome-achievements-btn {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(99, 102, 241, 0.35);
+  border-radius: 16px;
+  padding: 12px 28px;
+  font-family: var(--font-opendyslexic, inherit);
+  font-size: 1rem;
+  font-weight: 700;
+  color: #4f46e5;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: 0.01em;
+}
+
+.welcome-achievements-btn:hover {
+  background: rgba(99, 102, 241, 0.12);
+  border-color: #6366f1;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.2);
+}

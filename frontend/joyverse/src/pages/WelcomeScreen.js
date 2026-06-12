@@ -152,6 +152,15 @@ export default function WelcomeScreen() {
         </div>
       </button>
 
+      {/* ── Achievements link ───────────────────────────────────────────────── */}
+      <button
+        className="welcome-achievements-btn"
+        onClick={() => navigate("/achievements")}
+        aria-label="View my achievements and badges"
+      >
+        🏆 My Achievements
+      </button>
+
     </div>
   );
 }

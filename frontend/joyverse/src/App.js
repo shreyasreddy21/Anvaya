@@ -21,6 +21,10 @@ import ConfusableLetterGame    from "./pages/ConfusableLetterGame";
 import RANGame                 from "./pages/RANGame";
 import VerbalMemoryGame        from "./pages/VerbalMemoryGame";
 import ReportPage              from "./pages/ReportPage";
+import ReadingFluency          from "./pages/ReadingFluency";
+import SightWordDrill          from "./pages/SightWordDrill";
+import MorphologyGame          from "./pages/MorphologyGame";
+import AchievementDashboard    from "./pages/AchievementDashboard";
 
 /** Floating accessibility button — inside provider so it can read context. */
 function AccessibilityFAB() {
@@ -59,6 +63,10 @@ function App() {
           <Route path="/confusableletter"    element={<ConfusableLetterGame />} />
           <Route path="/ran"                 element={<RANGame />} />
           <Route path="/verbalmemory"        element={<VerbalMemoryGame />} />
+          <Route path="/reading-fluency"     element={<ReadingFluency />} />
+          <Route path="/sight-words"         element={<SightWordDrill />} />
+          <Route path="/morphology-builder"  element={<MorphologyGame />} />
+          <Route path="/achievements"        element={<AchievementDashboard />} />
           <Route path="/therapistdashboard"  element={<TherapistDashboard />} />
           <Route path="/report/:childUsername" element={<ReportPage />} />
           <Route path="/superadmin"          element={<SuperAdminDashboard />} />
