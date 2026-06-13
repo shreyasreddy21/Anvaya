@@ -10,11 +10,39 @@ import express from 'express';
 import mongoose from 'mongoose';
 import PhonemeTapSession   from '../models/PhonemeTapSession.js';
 import LetterSoundSession  from '../models/LetterSoundSession.js';
+import ConfusableSession   from '../models/ConfusableSession.js';
 import RANSession          from '../models/RANSession.js';
 import VerbalMemorySession from '../models/VerbalMemorySession.js';
 import { requireAuth, requireRole } from '../middleware/auth.js';
 
 const router = express.Router();
+
+// GET /api/analytics/:childUsername/sessions-bundle
+// Consolidates the six raw game-session lists the therapist detail view needs
+// into ONE round-trip (previously six parallel requests). Shapes/sorts/limits
+// match the individual routes exactly so the dashboard renders identically.
+router.get('/:childUsername/sessions-bundle',
+  requireAuth,
+  requireRole('therapist', 'superadmin'),
+  async (req, res) => {
+    const username = req.params.childUsername;
+    try {
+      const GameSession = mongoose.models.GameSession;
+      const [sessions, phonemeTap, letterSound, confusable, ran, verbalMemory] = await Promise.all([
+        GameSession ? GameSession.find({ username }).sort({ createdAt: -1 }) : [],
+        PhonemeTapSession.find({ username }).sort({ createdAt: -1 }),
+        LetterSoundSession.find({ username }).sort({ createdAt: -1 }),
+        ConfusableSession.find({ username }).sort({ createdAt: -1 }).limit(20),
+        RANSession.find({ username }).sort({ createdAt: -1 }).limit(20),
+        VerbalMemorySession.find({ username }).sort({ createdAt: -1 }).limit(20),
+      ]);
+      res.json({ sessions, phonemeTap, letterSound, confusable, ran, verbalMemory });
+    } catch (err) {
+      console.error('[analytics] sessions-bundle error:', err.message);
+      res.status(500).json({ message: 'Failed to fetch session bundle' });
+    }
+  }
+);
 
 // GET /api/analytics/:childUsername
 router.get('/:childUsername',

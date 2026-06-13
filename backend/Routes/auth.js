@@ -3,14 +3,13 @@
  *
  * POST /api/auth/login
  *   — Accepts username + password
- *   — Compares with bcrypt (with legacy plaintext fallback for migration)
+ *   — Compares with bcrypt
  *   — Returns a signed JWT on success
  *
  * Security notes:
- *  • Plaintext password comparison is intentionally removed.
- *  • Passwords are hashed with bcrypt (SALT_ROUNDS=12) at save time.
- *  • Legacy migration: if stored password is not a bcrypt hash (pre-hashing),
- *    we fall back to plaintext compare once, then re-hash and persist.
+ *  • Passwords are ALWAYS hashed with bcrypt (SALT_ROUNDS=12) at save time.
+ *  • A stored value that is not a bcrypt hash is rejected outright — there is
+ *    no plaintext comparison path (verified: 0 plaintext passwords in the DB).
  *  • The token payload contains only non-sensitive identity fields.
  *  • Error messages are intentionally generic to prevent user enumeration.
  */
@@ -23,27 +22,15 @@ import SuperAdmin from '../models/SuperAdmin.js';
 
 const router = express.Router();
 
-const BCRYPT_PREFIX = '$2b$';
+// Matches every bcrypt variant prefix ($2a$, $2b$, $2y$) so hashes from any
+// bcrypt implementation are recognised and never mistaken for plaintext.
+const BCRYPT_RE = /^\$2[aby]\$/;
 
-// Returns true if the stored hash looks like a bcrypt hash.
-function isBcryptHash(str) {
-  return typeof str === 'string' && str.startsWith(BCRYPT_PREFIX);
-}
-
-// Compares password against stored value.
-// Handles both hashed (new) and plaintext (legacy, migration) passwords.
-async function verifyPassword(candidate, stored, doc) {
-  if (isBcryptHash(stored)) {
-    return bcrypt.compare(candidate, stored);
-  }
-  // Legacy plaintext — only for migration. Constant-time compare via bcrypt hash.
-  const matched = candidate === stored;
-  if (matched) {
-    // Transparently re-hash the plaintext password on successful login.
-    doc.password = candidate; // Triggers the pre-save bcrypt hook
-    await doc.save();
-  }
-  return matched;
+// Verify a candidate password against a stored bcrypt hash.
+// Non-hash stored values are rejected (no plaintext acceptance).
+async function verifyPassword(candidate, stored) {
+  if (typeof stored !== 'string' || !BCRYPT_RE.test(stored)) return false;
+  return bcrypt.compare(candidate, stored);
 }
 
 function issueToken(payload) {
@@ -66,14 +53,14 @@ router.post('/login', async (req, res) => {
   try {
     // 1. SuperAdmin
     const superadmin = await SuperAdmin.findOne({ username: normalised });
-    if (superadmin && await verifyPassword(password, superadmin.password, superadmin)) {
+    if (superadmin && await verifyPassword(password, superadmin.password)) {
       const token = issueToken({ userId: superadmin._id.toString(), role: 'superadmin', username: normalised });
       return res.json({ role: 'superadmin', token });
     }
 
     // 2. Therapist
     const therapist = await Therapist.findOne({ username: normalised });
-    if (therapist && await verifyPassword(password, therapist.password, therapist)) {
+    if (therapist && await verifyPassword(password, therapist.password)) {
       const token = issueToken({
         userId:      therapist._id.toString(),
         role:        'therapist',
@@ -85,7 +72,7 @@ router.post('/login', async (req, res) => {
 
     // 3. Child
     const child = await Child.findOne({ username: normalised });
-    if (child && await verifyPassword(password, child.password, child)) {
+    if (child && await verifyPassword(password, child.password)) {
       const token = issueToken({
         userId:      child._id.toString(),
         role:        'child',

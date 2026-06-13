@@ -1,30 +1,47 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import React, { Suspense, lazy } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import "./App.css";
 import { AccessibilityProvider, useAccessibility } from "./context/AccessibilityContext";
 import AccessibilitySettingsModal from "./components/AccessibilitySettingsModal";
-import WordPuzzleAdventure from "./pages/WordPuzzleAdventure";
-import MathGame from "./pages/MathGame";
-import Games from "./pages/Games";
-import Quiz from "./pages/Quiz";
-import LoginPage from "./pages/LoginPage";
-import TherapistDashboard from "./pages/TherapistDashboard";
-import WelcomeScreen from "./pages/WelcomeScreen";
-import SyllableTapGame from "./pages/SyllableTapGame";
-import ShapeMemoryGame from "./pages/ShapeMemoryGame";
-import LetterBridge from "./pages/LetterBridge";
-import MirrorWordsGame from "./pages/MirrorWordsGame";
-import SuperAdminDashboard from "./pages/SuperAdminDashboard";
-import PhonemeTapGame          from "./pages/PhonemeTapGame";
-import LetterSoundGame         from "./pages/LetterSoundGame";
-import ConfusableLetterGame    from "./pages/ConfusableLetterGame";
-import RANGame                 from "./pages/RANGame";
-import VerbalMemoryGame        from "./pages/VerbalMemoryGame";
-import ReportPage              from "./pages/ReportPage";
-import ReadingFluency          from "./pages/ReadingFluency";
-import SightWordDrill          from "./pages/SightWordDrill";
-import MorphologyGame          from "./pages/MorphologyGame";
-import AchievementDashboard    from "./pages/AchievementDashboard";
+import ErrorBoundary from "./components/ErrorBoundary";
+
+// Routed pages are code-split so the login screen no longer downloads every
+// game's code up front. Each chunk loads on demand behind <Suspense>.
+const WordPuzzleAdventure = lazy(() => import("./pages/WordPuzzleAdventure"));
+const MathGame            = lazy(() => import("./pages/MathGame"));
+const Games               = lazy(() => import("./pages/Games"));
+const Quiz                = lazy(() => import("./pages/Quiz"));
+const LoginPage           = lazy(() => import("./pages/LoginPage"));
+const TherapistDashboard  = lazy(() => import("./pages/TherapistDashboard"));
+const WelcomeScreen       = lazy(() => import("./pages/WelcomeScreen"));
+const SyllableTapGame     = lazy(() => import("./pages/SyllableTapGame"));
+const ShapeMemoryGame     = lazy(() => import("./pages/ShapeMemoryGame"));
+const LetterBridge        = lazy(() => import("./pages/LetterBridge"));
+const MirrorWordsGame     = lazy(() => import("./pages/MirrorWordsGame"));
+const SuperAdminDashboard = lazy(() => import("./pages/SuperAdminDashboard"));
+const PhonemeTapGame      = lazy(() => import("./pages/PhonemeTapGame"));
+const LetterSoundGame     = lazy(() => import("./pages/LetterSoundGame"));
+const ConfusableLetterGame = lazy(() => import("./pages/ConfusableLetterGame"));
+const RANGame             = lazy(() => import("./pages/RANGame"));
+const VerbalMemoryGame    = lazy(() => import("./pages/VerbalMemoryGame"));
+const ReportPage          = lazy(() => import("./pages/ReportPage"));
+const ReadingFluency      = lazy(() => import("./pages/ReadingFluency"));
+const SightWordDrill      = lazy(() => import("./pages/SightWordDrill"));
+const MorphologyGame      = lazy(() => import("./pages/MorphologyGame"));
+const AchievementDashboard = lazy(() => import("./pages/AchievementDashboard"));
+
+/** Friendly full-screen loader shown while a route chunk downloads. */
+function RouteLoading() {
+  return (
+    <div style={{
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+      minHeight: '100vh', gap: '16px', fontFamily: 'var(--font-opendyslexic, sans-serif)',
+    }}>
+      <div className="route-spinner" aria-hidden="true" />
+      <p style={{ color: 'var(--text-secondary, #6b7280)', margin: 0 }}>Loading…</p>
+    </div>
+  );
+}
 
 /** Floating accessibility button — inside provider so it can read context. */
 function AccessibilityFAB() {
@@ -42,11 +59,13 @@ function AccessibilityFAB() {
   );
 }
 
-function App() {
+/** Routes wrapped in an error boundary that auto-resets when the path changes. */
+function AppRoutes() {
+  const location = useLocation();
   return (
-    <AccessibilityProvider>
-      <Router>
-        <Routes>
+    <ErrorBoundary resetKey={location.pathname} homeHref="/games">
+      <Suspense fallback={<RouteLoading />}>
+        <Routes location={location}>
           <Route path="/"                    element={<Navigate to="/loginpage" />} />
           <Route path="/loginpage"           element={<LoginPage />} />
           <Route path="/welcomepage"         element={<WelcomeScreen />} />
@@ -87,6 +106,16 @@ function App() {
             </div>
           } />
         </Routes>
+      </Suspense>
+    </ErrorBoundary>
+  );
+}
+
+function App() {
+  return (
+    <AccessibilityProvider>
+      <Router>
+        <AppRoutes />
 
         {/* Global accessibility modal + FAB rendered on every route */}
         <AccessibilitySettingsModal />

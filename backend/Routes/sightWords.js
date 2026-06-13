@@ -13,6 +13,7 @@
 import express from 'express';
 import SightWordProgress from '../models/SightWordProgress.js';
 import { requireAuth, requireRole } from '../middleware/auth.js';
+import { applySM2 } from '../utils/sm2.js';
 
 const router = express.Router();
 
@@ -78,29 +79,13 @@ router.post('/response',
         .findOne({ username, word: word.trim() })
         .lean();
 
-      let easeFactor  = existing?.easeFactor  ?? 2.5;
-      let interval    = existing?.interval    ?? 1;
-      let repetitions = existing?.repetitions ?? 0;
-
-      const q = quality;
-
-      // SM-2 algorithm
-      if (q < 3) {
-        // Failed recall: reset streak
-        repetitions = 0;
-        interval    = 1;
-      } else {
-        repetitions += 1;
-        if (repetitions === 1)      interval = 1;
-        else if (repetitions === 2) interval = 6;
-        else                        interval = Math.round(interval * easeFactor);
-
-        const newEF = easeFactor + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02));
-        easeFactor = Math.max(1.3, newEF);
-      }
-
-      const nextReview = new Date(Date.now() + interval * 24 * 60 * 60 * 1000);
-      const isCorrect  = q >= 3;
+      // Apply the SM-2 scheduler (pure, unit-tested in utils/sm2.js)
+      const { easeFactor, interval, repetitions, nextReview } = applySM2(quality, {
+        easeFactor:  existing?.easeFactor,
+        interval:    existing?.interval,
+        repetitions: existing?.repetitions,
+      });
+      const isCorrect = quality >= 3;
 
       const updated = await SightWordProgress.findOneAndUpdate(
         { username, word: word.trim() },

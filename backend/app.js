@@ -15,7 +15,6 @@ import wordQuestionsRoutes   from './Routes/wordQuestions.js';
 import syllableRoutes        from './Routes/syllableGame.js';
 import mirrorQuestionRoutes  from './Routes/mirrorQuestion.js';
 import superadminRoutes      from './Routes/superadmin.js';
-import emotionRoutes         from './Routes/emotion.js';
 import phonicsContentRoutes  from './Routes/phonicsContent.js';
 import phonemeTapRoutes      from './Routes/phonemeTap.js';
 import letterSoundRoutes     from './Routes/letterSound.js';
@@ -31,6 +30,7 @@ import fluencyRoutes          from './Routes/fluency.js';
 import sightWordsRoutes       from './Routes/sightWords.js';
 import morphologyRoutes       from './Routes/morphology.js';
 import ttsRoutes              from './Routes/tts.js';
+import adaptiveRoutes         from './Routes/adaptive.js';
 
 // ── Startup guard ────────────────────────────────────────────────────────────
 if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
@@ -143,9 +143,6 @@ app.use('/api/syllable-game',       syllableRoutes);
 app.use('/api/mirrorquestions',     mirrorQuestionRoutes);
 app.use('/api',                     quizRoutes); // GET /api/questions
 
-// Emotion detection proxy — auth-gated (requires child or therapist JWT)
-app.use('/api/emotion',             emotionRoutes);
-
 // Game data — auth-gated (see individual routes)
 app.use('/api/sessions',            gameSessionRoutes);
 app.use('/api/phoneme-tap',         phonemeTapRoutes);
@@ -156,6 +153,7 @@ app.use('/api/verbal-memory',       verbalMemoryRoutes);
 app.use('/api/fluency',             fluencyRoutes);
 app.use('/api/sight-words',         sightWordsRoutes);
 app.use('/api/morphology',          morphologyRoutes);
+app.use('/api/adaptive',            adaptiveRoutes);
 app.use('/api/adaptation-log',      adaptationLogRoutes);
 app.use('/api/assigned-sessions',   assignedSessionsRoutes);
 

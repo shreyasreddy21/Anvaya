@@ -5,6 +5,8 @@ import useEmotionDetection from '../hooks/useEmotionDetection';
 import useGameSessionLogger from '../hooks/useGameSessionLogger';
 import GameShell from '../components/GameShell';
 import TTSButton from '../components/TTSButton';
+import AdaptiveSuggestion from '../components/AdaptiveSuggestion';
+import useAdaptiveDifficulty from '../hooks/useAdaptiveDifficulty';
 import SpeechService from '../services/SpeechService';
 import { PHONICS_LEVEL_ORDER, PhonicsLevelMeta } from '../constants/PhonicsLevel';
 import axios from 'axios';
@@ -32,10 +34,19 @@ export default function PhonemeTapGame() {
   const [gameOver,    setGameOver]    = useState(false);
   const [loading,     setLoading]     = useState(false);
   const [loadError,   setLoadError]   = useState('');
+  const [roundsDone,  setRoundsDone]  = useState(0);
+  const [suggestionDismissed, setSuggestionDismissed] = useState(false);
 
   const sessionStartRef = useRef(new Date());
   const username = localStorage.getItem('username');
   const { endSession } = useGameSessionLogger({ username, difficulty, expression: emotion, score, phonicsLevel });
+
+  // Adaptive difficulty: ask the engine for a recommendation once a round ends,
+  // re-fetching after each completed round so it reflects the latest performance.
+  const recommendation = useAdaptiveDifficulty('phonemetap', difficulty, {
+    enabled: gameOver,
+    refreshKey: roundsDone,
+  });
 
   const loadWords = useCallback(async (level, diff) => {
     setLoading(true);
@@ -111,6 +122,7 @@ export default function PhonemeTapGame() {
         : 0;
 
       setGameOver(true);
+      setSuggestionDismissed(false);
       confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
 
       const moodAtStart = localStorage.getItem('selectedEmotion') || 'neutral';
@@ -124,7 +136,10 @@ export default function PhonemeTapGame() {
         wordResults: allResults,
         overallAccuracy,
         moodAtStart,
-      }).catch(err => console.error('Failed to save phoneme tap session:', err));
+      })
+        .catch(err => console.error('Failed to save phoneme tap session:', err))
+        // Re-fetch the adaptive recommendation once the new session is persisted.
+        .finally(() => setRoundsDone(n => n + 1));
 
       endSession();
     } else {
@@ -200,6 +215,13 @@ export default function PhonemeTapGame() {
                   </div>
                 ))}
               </div>
+              {!suggestionDismissed && (
+                <AdaptiveSuggestion
+                  recommendation={recommendation}
+                  onAccept={(level) => { setDifficulty(level); loadWords(phonicsLevel, level); }}
+                  onDismiss={() => setSuggestionDismissed(true)}
+                />
+              )}
               <button className="ptg-btn ptg-btn--primary" onClick={() => loadWords(phonicsLevel, difficulty)}>
                 Play Again
               </button>

@@ -114,20 +114,14 @@ const TherapistDashboard = () => {
     setShowSessionDetails(true);
     setSessionError('');
     try {
-      const [sessionsRes, ptRes, lsRes, clRes, ranRes, vmRes] = await Promise.all([
-        axios.get(`${API_BASE}/api/sessions?username=${username}`),
-        axios.get(`${API_BASE}/api/phoneme-tap?username=${username}`),
-        axios.get(`${API_BASE}/api/letter-sound?username=${username}`),
-        axios.get(`${API_BASE}/api/confusable-letter?username=${username}`),
-        axios.get(`${API_BASE}/api/ran?username=${username}`),
-        axios.get(`${API_BASE}/api/verbal-memory?username=${username}`),
-      ]);
-      setSelectedChildSessions(sessionsRes.data);
-      setPhonemeTapSessions(ptRes.data);
-      setLetterSoundSessions(lsRes.data);
-      setConfusableSessions(clRes.data);
-      setRANSessions(ranRes.data);
-      setVerbalMemorySessions(vmRes.data);
+      // Single consolidated request replaces six parallel game-session fetches.
+      const { data: bundle } = await axios.get(`${API_BASE}/api/analytics/${username}/sessions-bundle`);
+      setSelectedChildSessions(bundle.sessions);
+      setPhonemeTapSessions(bundle.phonemeTap);
+      setLetterSoundSessions(bundle.letterSound);
+      setConfusableSessions(bundle.confusable);
+      setRANSessions(bundle.ran);
+      setVerbalMemorySessions(bundle.verbalMemory);
 
       // Additional analytics + progression + adaptation
       try {
