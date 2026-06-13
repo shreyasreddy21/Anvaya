@@ -7,6 +7,7 @@ import EmotionBarChart from '../components/EmotionBarChart';
 import EmotionPercentageList from '../components/EmotionPercentageList';
 import { LoadingState, ErrorBanner, EmptyState } from '../components/LoadingState';
 import { API_BASE } from '../config/api';
+import { logout } from '../utils/logout';
 
 const READING_LEVELS = ['pre-reader', 'CVC', 'Blends', 'Digraphs', 'VowelPatterns'];
 const ASSIGNABLE_GAMES = [
@@ -240,6 +241,11 @@ const TherapistDashboard = () => {
   );
   return (
     <div className="dashboard-container">
+      <div className="dashboard-topbar">
+        <button className="dashboard-logout-btn" onClick={logout} aria-label="Log out">
+          🚪 Logout
+        </button>
+      </div>
       <h2 className="welcome-therapist">Welcome back, Therapist!</h2>
       <h2 className="dashboard-title">Logged-in Children</h2>
 

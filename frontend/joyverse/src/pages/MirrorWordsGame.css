@@ -36,31 +36,63 @@
 }
 
 .mirror-game-question {
-  font-size: 60px;
   color: #1f2937;
-  margin-bottom: 30px;
+  margin-bottom: 28px;
   font-weight: bold;
-  padding: 10px;
-  border:3px solid rgb(244, 220, 84);
+  padding: 18px 16px;
+  border: 3px solid rgb(244, 220, 84);
   background-color: #fffbb0;
   border-radius: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+/* The surrounding question text — readable but not overpowering */
+.mirror-question-text {
+  font-size: 1.7rem;
+  line-height: 1.4;
+}
+
+/* The target letter / word the child must find — big and colour-highlighted */
+.mirror-target {
+  display: inline-block;
+  font-size: 3.6rem;
+  font-weight: 900;
+  color: #dc2626;
+  padding: 0 8px;
+  letter-spacing: 0.03em;
 }
 
 .mirror-options {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 15px;
+  gap: 18px;
   margin-bottom: 20px;
 }
 
 .mirror-option {
-  font-size: 28px;
-  padding: 15px;
+  font-size: 42px;
+  font-weight: 800;
+  padding: 22px 18px;
   background-color: #fde68a;
   border: 3px solid #fbbf24;
   border-radius: 15px;
   cursor: pointer;
   transition: all 0.3s ease;
+}
+
+/* Answer feedback colouring on the option buttons themselves */
+.mirror-option.correct {
+  background-color: #bbf7d0;
+  border-color: #16a34a;
+  color: #166534;
+}
+.mirror-option.incorrect {
+  background-color: #fecaca;
+  border-color: #dc2626;
+  color: #991b1b;
 }
 
 .mirror-option:hover:not(:disabled) {
@@ -104,14 +136,19 @@
 }
 .mirror-level-selector {
   margin-bottom: 20px;
-  font-size: 16px;
+  font-size: 22px;
+  font-weight: 700;
   text-align: center;
 }
 
 .mirror-level-selector select {
-  padding: 5px 10px;
-  font-size: 16px;
+  padding: 10px 18px;
+  font-size: 20px;
   margin-left: 10px;
+  border-radius: 10px;
+  border: 2px solid #d97706;
+  font-family: inherit;
+  cursor: pointer;
 }
 
 .mirror-score {

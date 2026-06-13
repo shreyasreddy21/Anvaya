@@ -152,6 +152,17 @@ const handleDifficultyChange = (e) => {
   }}>
     <h2 className="game-title">Syllable Tap</h2>
 
+    <div className="tts-inline syll-desc" style={{ justifyContent: "center", marginBottom: "10px" }}>
+      <p className="game-text" style={{ margin: 0 }}>
+        Listen to the word, then tap once for each syllable (beat) you hear — like "ta-ble" = 2 taps.
+      </p>
+      <TTSButton
+        text="Listen to the word, then tap once for each syllable, or beat, you hear. For example, table has two beats."
+        size="sm"
+        label="Read instructions aloud"
+      />
+    </div>
+
     <div className="difficulty-select">
       <label htmlFor="difficulty">Difficulty: </label>
       <select id="difficulty" value={difficulty} onChange={handleDifficultyChange}>

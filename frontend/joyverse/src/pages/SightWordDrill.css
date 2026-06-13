@@ -150,3 +150,14 @@
     justify-content: center;
   }
 }
+
+/* Description row with read-aloud button */
+.swd-instruction-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  max-width: 560px;
+  margin: 0 auto;
+}

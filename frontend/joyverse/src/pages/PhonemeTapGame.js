@@ -52,10 +52,20 @@ export default function PhonemeTapGame() {
     setLoading(true);
     setLoadError('');
     try {
-      const params = new URLSearchParams({ level, gameType: 'phoneme_tap', difficulty: diff });
-      const res = await fetch(`${API_BASE}/api/phonics?${params}`);
-      if (!res.ok) throw new Error('fetch failed');
-      const raw = await res.json();
+      const fetchAt = async (d) => {
+        const params = new URLSearchParams({ level, gameType: 'phoneme_tap' });
+        if (d) params.set('difficulty', d);
+        const r = await fetch(`${API_BASE}/api/phonics?${params}`);
+        if (!r.ok) throw new Error('fetch failed');
+        return r.json();
+      };
+
+      let raw = await fetchAt(diff);
+      // Some levels (e.g. Advanced Patterns) have no content at every difficulty.
+      // Fall back to any difficulty for the level rather than showing nothing.
+      if (!raw || raw.length === 0) {
+        raw = await fetchAt(null);
+      }
 
       if (!raw || raw.length === 0) {
         setLoadError('No phoneme content found for this level. Try a different combination.');
@@ -275,7 +285,14 @@ export default function PhonemeTapGame() {
                 <span className="ptg-word">{current.word}</span>
                 <TTSButton text={current.word} size="md" rate={0.75} label={`Hear "${current.word}"`} />
               </div>
-              <p className="ptg-instruction">Listen, then tap once for each sound you hear.</p>
+              <div className="ptg-instruction-row">
+                <p className="ptg-instruction">Listen, then tap once for each sound you hear.</p>
+                <TTSButton
+                  text="Listen, then tap once for each sound you hear."
+                  size="sm"
+                  label="Read instructions aloud"
+                />
+              </div>
             </div>
           )}
 

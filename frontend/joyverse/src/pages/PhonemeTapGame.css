@@ -262,3 +262,26 @@
 }
 
 .ptg-error { color: #991b1b; }
+
+/* ── Round 5: larger, clearer text for readability ── */
+.ptg-instruction-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.ptg-instruction {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+.ptg-word {
+  font-size: clamp(2.6rem, 7vw, 4rem) !important;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+.ptg-select-group label { font-size: 1.05rem; font-weight: 700; }
+.ptg-select-group select { font-size: 1.05rem; padding: 8px 12px; }
+.ptg-progress { font-size: 1.05rem; font-weight: 600; }
+.ptg-scorebar { font-size: 1.15rem; font-weight: 700; }

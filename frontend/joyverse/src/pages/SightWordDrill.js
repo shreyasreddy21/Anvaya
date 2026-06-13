@@ -3,6 +3,7 @@ import GameShell from '../components/GameShell';
 import useEmotionDetection from '../hooks/useEmotionDetection';
 import { getCardStyle } from '../utils/EmotionThemeMap';
 import SpeechService from '../services/SpeechService';
+import TTSButton from '../components/TTSButton';
 import { API_BASE } from '../config/api';
 import axios from 'axios';
 import confetti from 'canvas-confetti';
@@ -120,9 +121,17 @@ export default function SightWordDrill() {
         <div className="swd-container">
           <div className="gs-card" style={cardStyle}>
             <h1 className="gs-card__title">Sight Word Drill 📚</h1>
-            <p className="swd-instruction">
-              Practice high-frequency words to boost your reading speed!
-            </p>
+            <div className="swd-instruction-row">
+              <p className="swd-instruction">
+                Practice high-frequency words to boost your reading speed! Each word
+                is read aloud — say it back, then tap how well you knew it.
+              </p>
+              <TTSButton
+                text="Practice high-frequency words to boost your reading speed! Each word is read aloud. Say it back, then tap how well you knew it."
+                size="sm"
+                label="Read instructions aloud"
+              />
+            </div>
             <div className="swd-setup-row">
               <label htmlFor="swd-level" className="swd-label">Choose level:</label>
               <select

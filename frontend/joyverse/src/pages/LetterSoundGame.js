@@ -4,6 +4,7 @@ import './LetterSoundGame.css';
 import useEmotionDetection from '../hooks/useEmotionDetection';
 import useGameSessionLogger from '../hooks/useGameSessionLogger';
 import GameShell from '../components/GameShell';
+import TTSButton from '../components/TTSButton';
 import SpeechService from '../services/SpeechService';
 import { PHONICS_LEVEL_ORDER, PhonicsLevelMeta } from '../constants/PhonicsLevel';
 import axios from 'axios';
@@ -108,6 +109,10 @@ export default function LetterSoundGame() {
       SpeechService.speak(`Not quite. The answer is ${current.correct}.`, { rate: 0.85 });
     }
 
+    // Give the spoken feedback time to finish before moving on (longer when
+    // incorrect, since that message is longer) — prevents the next question's
+    // narration cutting across the feedback.
+    const advanceDelay = correct ? 1800 : 2800;
     setTimeout(() => {
       const nextIdx = currentIdx + 1;
       if (nextIdx >= questions.length) {
@@ -116,7 +121,7 @@ export default function LetterSoundGame() {
         setCurrentIdx(nextIdx);
         setSelected(null);
       }
-    }, 1400);
+    }, advanceDelay);
   };
 
   const finishGame = (allResults) => {
@@ -274,7 +279,14 @@ export default function LetterSoundGame() {
                   🔊
                 </button>
               </div>
-              <p className="lsg-prompt">Which word starts with this sound?</p>
+              <div className="lsg-prompt-row">
+                <p className="lsg-prompt">Which word starts with this sound?</p>
+                <TTSButton
+                  text="Which word starts with this sound?"
+                  size="sm"
+                  label="Read the question aloud"
+                />
+              </div>
 
               <div className="lsg-options">
                 {shuffledOptions.map(opt => {

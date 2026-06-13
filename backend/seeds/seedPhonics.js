@@ -24,70 +24,70 @@ const SEED = [
   {
     level: 'CVC', gameType: 'letter_bridge', difficulty: 'easy',
     letters: [['h','s','l','b'], ['a','i','o'], ['t','x']],
-    validWords: ['hat','hit','hot','bat','bit','sat','sit','lot'],
+    validWords: ['bat','bit','box','hat','hit','hot','lit','lot','sat','sit','six'],
   },
   {
     level: 'CVC', gameType: 'letter_bridge', difficulty: 'easy',
     letters: [['c','r','p'], ['a','e','o'], ['t','n','d']],
-    validWords: ['cat','can','cad','rat','ran','rod','pat','pan','pod'],
+    validWords: ['cad','can','cat','cod','con','cot','pad','pan','pat','pen','pet','pod','pot','ran','rat','red','rod','rot'],
   },
   {
     level: 'CVC', gameType: 'letter_bridge', difficulty: 'medium',
     letters: [['d','f','m'], ['a','i','o'], ['t','g','p']],
-    validWords: ['dot','dig','fat','fig','fog','mat','mop','dip'],
+    validWords: ['dig','dip','dog','dot','fat','fig','fit','fog','mag','map','mat','mop'],
   },
   {
     level: 'CVC', gameType: 'letter_bridge', difficulty: 'medium',
     letters: [['g','h','j'], ['a','e','o'], ['r','t','p']],
-    validWords: ['gap','get','got','hat','hop','jar','jet','jot'],
+    validWords: ['gap','get','got','hat','her','hop','hot','jar','jet','jot'],
   },
   {
     level: 'CVC', gameType: 'letter_bridge', difficulty: 'hard',
     letters: [['b','n','t'], ['u','a','e'], ['g','n','b']],
-    validWords: ['bug','bun','bub','nag','nun','tab','tan','ten','tub'],
+    validWords: ['bag','ban','beg','bug','bun','nag','nun','tab','tag','tan','ten','tub','tug'],
   },
 
   // Level 2: Blends
   {
     level: 'Blends', gameType: 'letter_bridge', difficulty: 'easy',
     letters: [['fl','cl','sl'], ['a','o','e'], ['g','p','d']],
-    validWords: ['flag','flop','fled','clap','clod','slap','slop','sled'],
+    validWords: ['clad','clap','clod','clog','flag','flap','fled','flop','slap','sled','slop'],
   },
   {
     level: 'Blends', gameType: 'letter_bridge', difficulty: 'medium',
     letters: [['st','sw','sn'], ['a','i','e'], ['p','m','g']],
-    validWords: ['stag','step','swim','snap','snag','stem'],
+    validWords: ['snag','snap','snip','stag','stem','step','swam','swap','swig','swim'],
   },
   {
     level: 'Blends', gameType: 'letter_bridge', difficulty: 'hard',
     letters: [['bl','br','dr'], ['a','e','i'], ['g','d','p']],
-    validWords: ['bag','bed','big','brad','bred','drag','drip','dreg'],
+    validWords: ['bled','blip','brad','brag','bred','brig','drag','drip'],
   },
 
   // Level 3: Digraphs
   {
     level: 'Digraphs', gameType: 'letter_bridge', difficulty: 'easy',
     letters: [['ch','sh','th'], ['a','i','o'], ['t','p','n']],
-    validWords: ['chat','chip','chop','ship','shop','that','thin','thon'],
+    validWords: ['chat','chin','chip','chop','shin','ship','shop','shot','than','that','thin'],
   },
   {
     level: 'Digraphs', gameType: 'letter_bridge', difficulty: 'medium',
     letters: [['ch','sh','wh'], ['e','i','a'], ['n','p','t']],
-    validWords: ['chen','chip','chat','shin','ship','when','whip','what'],
+    validWords: ['chap','chat','chin','chip','shin','ship','what','when','whip'],
   },
 
   // Level 4: Vowel Patterns
   {
     level: 'VowelPatterns', gameType: 'letter_bridge', difficulty: 'medium',
     letters: [['r','b','s'], ['ai','oa','ea'], ['n','t','d']],
-    validWords: ['rain','raid','boat','bead','beat','seat','said','soad'],
+    validWords: ['bait','bead','bean','beat','boat','raid','rain','read','road','said','seat'],
   },
 
   // Level 5: Advanced Patterns
   {
     level: 'AdvancedPatterns', gameType: 'letter_bridge', difficulty: 'hard',
     letters: [['l','n','t'], ['igh','ough','augh'], ['t','ter','']],
-    validWords: ['light','night','tight','nought','taught'],
+    validWords: ['laugh','laughter','light','lighter','naught','night','nought','taught','tight','tighter','tough'],
   },
 
   // ══════════════════════════════════════════════════════════════════════

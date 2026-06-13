@@ -13,6 +13,7 @@ export const DEFAULTS = {
   fontSize: 'normal',     // 'normal' | 'large' | 'xl'
   letterSpacing: 'normal', // 'normal' | 'wide' | 'wider'
   lineHeight: 'normal',   // 'normal' | 'relaxed' | 'loose'
+  ttsVoice: 'en-us+f3',   // espeak voice id (see TTS_VOICES in SpeechService)
 };
 
 const fontMap = {

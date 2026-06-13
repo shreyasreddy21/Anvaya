@@ -128,3 +128,40 @@
   .game-icon-emoji  { font-size: 3.2rem; }
   .games-page-card h2 { font-size: 0.9rem; }
 }
+
+/* Top action bar (achievements + logout) on the games dashboard */
+.games-topbar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 20px 0;
+  flex-wrap: wrap;
+}
+.games-topbar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border-radius: 14px;
+  border: none;
+  font-family: var(--font-opendyslexic, inherit);
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+}
+.games-topbar-btn:hover { transform: translateY(-2px); filter: brightness(1.05); }
+.games-topbar-btn--achievements {
+  background: linear-gradient(135deg, #f59e0b, #f97316);
+  color: #fff;
+}
+.games-topbar-btn--logout {
+  background: rgba(255, 255, 255, 0.85);
+  color: #b91c1c;
+  border: 2px solid rgba(185, 28, 28, 0.35);
+}
+@media (max-width: 480px) {
+  .games-topbar { justify-content: center; }
+  .games-topbar-btn { font-size: 0.95rem; padding: 10px 16px; }
+}

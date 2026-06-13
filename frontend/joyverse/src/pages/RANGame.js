@@ -4,6 +4,7 @@ import './RANGame.css';
 import useEmotionDetection from '../hooks/useEmotionDetection';
 import useGameSessionLogger from '../hooks/useGameSessionLogger';
 import GameShell from '../components/GameShell';
+import SpeechService from '../services/SpeechService';
 import axios from 'axios';
 import { API_BASE } from '../config/api';
 
@@ -74,6 +75,7 @@ export default function RANGame() {
   const [items,      setItems]      = useState([]);
   const [elapsed,    setElapsed]    = useState(0);
   const [flash,      setFlash]      = useState(null);
+  const [feedbackMsg, setFeedbackMsg] = useState('');
   const [score,      setScore]      = useState(0);
 
   const timerRef        = useRef(null);
@@ -125,8 +127,19 @@ export default function RANGame() {
     if (correct) setScore(s => s + 10);
     setFlash(correct ? 'correct' : 'wrong');
 
+    // Per-question feedback message. On a miss we also say the answer aloud to
+    // reinforce it; correct answers stay silent to keep the "rapid" pace.
+    if (correct) {
+      setFeedbackMsg('✓ Correct!');
+    } else {
+      const ans = sequence[currentIdx];
+      setFeedbackMsg(`✗ It was “${ans}”`);
+      SpeechService.speak(`It was ${ans}`, { rate: 0.9 });
+    }
+
     const advance = () => {
       setFlash(null);
+      setFeedbackMsg('');
       const nextIdx = currentIdx + 1;
       if (nextIdx >= sequence.length) {
         finishGame(newItems);
@@ -137,11 +150,9 @@ export default function RANGame() {
       }
     };
 
-    if (correct) {
-      advance();
-    } else {
-      setTimeout(advance, 600);
-    }
+    // A short pause on every item so the child registers the feedback;
+    // a little longer on a miss so the spoken answer can finish.
+    setTimeout(advance, correct ? 650 : 1600);
   };
 
   const finishGame = (allItems) => {
@@ -348,6 +359,12 @@ export default function RANGame() {
               </button>
             ))}
           </div>
+
+          {feedbackMsg && (
+            <div className={`ran-feedback ran-feedback--${flash}`} role="status">
+              {feedbackMsg}
+            </div>
+          )}
         </div>
       </div>
       <video  ref={videoRef}  autoPlay style={{ display: 'none' }} />

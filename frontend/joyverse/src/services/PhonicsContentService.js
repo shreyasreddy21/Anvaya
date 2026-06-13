@@ -1,4 +1,6 @@
-const BASE_URL = 'http://localhost:4000/api/phonics';
+import { API_BASE } from '../config/api';
+
+const BASE_URL = `${API_BASE}/api/phonics`;
 
 /**
  * PhonicsContentService

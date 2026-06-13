@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { isDeprecated } from "../config/deprecatedGames";
 import { applyEmotionTheme } from "../utils/EmotionThemeMap";
+import { logout } from "../utils/logout";
 import "./Games.css";
 import shapememoryimg     from '../assets/shapememorygame.png';
 import mathfunimg         from '../assets/mathfun.png';
@@ -52,6 +53,23 @@ export default function Games() {
 
   return (
     <div className="games-page-container">
+      <div className="games-topbar">
+        <button
+          className="games-topbar-btn games-topbar-btn--achievements"
+          onClick={() => navigate('/achievements')}
+          aria-label="View my achievements"
+        >
+          🏆 My Achievements
+        </button>
+        <button
+          className="games-topbar-btn games-topbar-btn--logout"
+          onClick={logout}
+          aria-label="Log out and return to login"
+        >
+          🚪 Logout
+        </button>
+      </div>
+
       <section className="header-container">
         <h1 className="games-page-title">Choose Your Game</h1>
         <p className="games-page-subtitle">Pick a game and start learning! 🚀</p>

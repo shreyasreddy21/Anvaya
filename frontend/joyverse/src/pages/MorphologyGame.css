@@ -185,3 +185,15 @@
 .mg-review-q  { font-size: 0.8rem; color: var(--text-secondary, #6b7280); }
 .mg-review-wrong { font-size: 0.85rem; color: #ef4444; }
 .mg-review-correct { font-size: 0.85rem; color: #059669; }
+
+/* ── Round 5: larger text + cards ── */
+.mg-setup-desc { font-size: 1.15rem; line-height: 1.6; }
+.mg-word-display { font-size: clamp(2.6rem, 6vw, 4rem); }
+.mg-affix-pill { font-size: clamp(2.4rem, 5vw, 3.6rem); padding: 14px 30px; }
+.mg-question-text { font-size: 1.3rem; }
+.mg-tile { font-size: clamp(1.7rem, 4vw, 2.4rem); padding: 16px 30px; }
+.mg-options .gs-option { font-size: 1.3rem; padding: 18px 16px; }
+.mg-header-row .gs-score { font-size: 1.15rem; }
+.mg-diff-btn { min-width: 140px; padding: 18px 24px; }
+.mg-diff-label { font-size: 1.1rem; }
+.mg-diff-desc { font-size: 0.85rem; }

@@ -227,6 +227,11 @@ export default function ReadingFluency() {
         <div className="rf-container">
           <div className="gs-card" style={cardStyle}>
             <h1 className="gs-card__title">Reading Fluency 📖</h1>
+            <p className="rf-setup-desc">
+              Practise reading smoothly and at a good pace. Pick a story, then
+              <strong> listen and follow along</strong>, or <strong>read it aloud</strong> and
+              we'll track your words-per-minute and accuracy.
+            </p>
             <p className="rf-setup-intro">Choose a passage and a practice mode:</p>
             <div className="rf-passage-cards">
               {PASSAGES.map(p => (
@@ -287,6 +292,13 @@ export default function ReadingFluency() {
               })}
             </div>
             <div className="rf-listen-controls">
+              <button
+                className="gs-btn gs-btn--ghost rf-back-btn"
+                onClick={() => { stopListening(); setPhase('setup'); }}
+                aria-label="Back to passage selection"
+              >
+                ← Back
+              </button>
               {!listenDone ? (
                 <>
                   <button
@@ -322,13 +334,6 @@ export default function ReadingFluency() {
                   </button>
                 </>
               )}
-              <button
-                className="gs-btn gs-btn--ghost"
-                onClick={() => { stopListening(); setPhase('setup'); }}
-                aria-label="Back to passage selection"
-              >
-                ← Back
-              </button>
             </div>
           </div>
         </div>
@@ -371,6 +376,15 @@ export default function ReadingFluency() {
               })}
             </div>
             <div className="rf-listen-controls">
+              {!isRecording && (
+                <button
+                  className="gs-btn gs-btn--ghost rf-back-btn"
+                  onClick={() => setPhase('setup')}
+                  aria-label="Back to passage selection"
+                >
+                  ← Back
+                </button>
+              )}
               {srSupported && !isRecording && (
                 <button
                   className="gs-btn gs-btn--success"
@@ -387,15 +401,6 @@ export default function ReadingFluency() {
                   aria-label="Finish reading and see results"
                 >
                   ⏹ Done
-                </button>
-              )}
-              {!isRecording && (
-                <button
-                  className="gs-btn gs-btn--ghost"
-                  onClick={() => setPhase('setup')}
-                  aria-label="Back to passage selection"
-                >
-                  ← Back
                 </button>
               )}
             </div>

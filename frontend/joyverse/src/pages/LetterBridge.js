@@ -131,8 +131,8 @@ const LetterBridge = () => {
   return (
     <GameShell title="Letter Bridging" emotion={emotion} confidence={confidence}>
     <div className="game-card" style={cardStyle}>
-      <div className="tts-inline" style={{ justifyContent: "center", marginBottom: "6px" }}>
-        <p className="game-instructions" style={{ margin: 0 }}>
+      <div style={{ textAlign: "center", marginBottom: "10px" }}>
+        <p className="game-instructions" style={{ margin: "0 0 8px" }}>
           Tap one letter from each column, left to right, to form a valid word!
         </p>
         <TTSButton

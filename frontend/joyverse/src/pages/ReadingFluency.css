@@ -256,3 +256,29 @@
     font-size: 3rem;
   }
 }
+
+/* ── Round 5: description, bigger passage cards, left-aligned back ── */
+.rf-setup-desc {
+  font-size: 1.1rem;
+  line-height: 1.5;
+  color: var(--text-secondary, #4b5563);
+  text-align: center;
+  max-width: 620px;
+  margin: 0 auto 14px;
+}
+.rf-passage-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+}
+.rf-passage-card {
+  padding: 22px 20px;
+  border-radius: 18px;
+  min-height: 120px;
+}
+.rf-pc-title { font-size: 1.4rem; font-weight: 800; }
+.rf-pc-level { font-size: 1rem; }
+.rf-pc-meta  { font-size: 0.95rem; }
+/* Back button sits on the left, other controls to the right */
+.rf-listen-controls { position: relative; }
+.rf-back-btn { margin-right: auto; }

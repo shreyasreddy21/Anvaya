@@ -180,16 +180,18 @@ const WordPuzzleAdventure = () => {
           <TTSButton text="Unscramble the letters to form the correct word!" size="sm" label="Read instructions aloud" />
         </div>
 
-        <div className="difficulty-selector">
-          {["easy", "medium", "hard"].map((level) => (
-            <button
-              key={level}
-              className="game-button"
-              onClick={() => setDifficulty(level)}
-            >
-              {level.charAt(0).toUpperCase() + level.slice(1)}
-            </button>
-          ))}
+        <div className="wpa-difficulty">
+          <label htmlFor="wpa-diff">Choose Difficulty: </label>
+          <select
+            id="wpa-diff"
+            value={difficulty}
+            onChange={(e) => setDifficulty(e.target.value)}
+            aria-label="Choose difficulty"
+          >
+            <option value="easy">🟢 Easy</option>
+            <option value="medium">🟡 Medium</option>
+            <option value="hard">🔴 Hard</option>
+          </select>
         </div>
 
         <p className="game-text">Score: {score}</p>

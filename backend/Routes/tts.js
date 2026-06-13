@@ -24,6 +24,15 @@ import { spawn } from 'child_process';
 
 const router = express.Router();
 
+// Allowlist of selectable espeak-ng voices (kept in sync with TTS_VOICES in
+// the frontend SpeechService). Restricting to known-good ids avoids passing
+// arbitrary values to the synthesizer.
+const ALLOWED_VOICES = new Set([
+  'en-us+f3', 'en-us+m3', 'en-us+f5', 'en-us+m7',
+  'en-gb+f3', 'en-gb-x-rp', 'en-029',
+]);
+const DEFAULT_VOICE = 'en-us+f3';
+
 // Cache the availability check so we don't probe espeak-ng on every request.
 let _espeakAvailable = null;
 
@@ -50,12 +59,14 @@ router.get('/', async (req, res) => {
 
   const rate  = Math.min(250, Math.max(80, parseInt(req.query.rate, 10)  || 150));
   const pitch = Math.min(99,  Math.max(0,  parseInt(req.query.pitch, 10) || 50));
+  const reqVoice = String(req.query.voice || '');
+  const voice = ALLOWED_VOICES.has(reqVoice) ? reqVoice : DEFAULT_VOICE;
 
   // argv array — text passed as a single argument, no shell interpolation.
   const args = [
     '-s', String(rate),
     '-p', String(pitch),
-    '-v', 'en-us+f3',   // clearer female-ish voice, gentler for children
+    '-v', voice,
     '--stdout',
     text,
   ];

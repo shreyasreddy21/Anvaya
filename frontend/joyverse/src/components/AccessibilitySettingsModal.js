@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAccessibility } from '../context/AccessibilityContext';
+import SpeechService, { TTS_VOICES } from '../services/SpeechService';
 import './AccessibilitySettingsModal.css';
 
 const FONT_OPTIONS = [
@@ -131,6 +132,31 @@ export default function AccessibilitySettingsModal() {
                   {opt.label}
                 </button>
               ))}
+            </div>
+          </section>
+
+          {/* Reading Voice */}
+          <section className="a11y-section">
+            <h3 className="a11y-section-label">Reading Voice</h3>
+            <div className="a11y-voice-row">
+              <select
+                className="a11y-voice-select"
+                value={settings.ttsVoice}
+                onChange={(e) => updateSetting('ttsVoice', e.target.value)}
+                aria-label="Choose the reading voice"
+              >
+                {TTS_VOICES.map(v => (
+                  <option key={v.id} value={v.id}>{v.label}</option>
+                ))}
+              </select>
+              <button
+                type="button"
+                className="a11y-voice-preview-btn"
+                onClick={() => SpeechService.speak('Hello! Let us read together.', { rate: 0.9 })}
+                aria-label="Preview the selected voice"
+              >
+                🔊 Preview
+              </button>
             </div>
           </section>
 

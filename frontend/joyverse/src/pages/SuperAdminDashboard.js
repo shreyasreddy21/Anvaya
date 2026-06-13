@@ -3,6 +3,7 @@ import axios from "axios";
 import "./SuperAdminDashboard.css";
 
 import { API_BASE } from '../config/api';
+import { logout } from '../utils/logout';
 const SuperAdminDashboard = () => {
   const [therapists, setTherapists] = useState([]);
   const [form, setForm] = useState({ therapistId: '', name: '', username: '', password: '' });
@@ -34,6 +35,11 @@ const SuperAdminDashboard = () => {
 
   return (
     <div className="superadmin-dashboard-container">
+      <div className="dashboard-topbar">
+        <button className="dashboard-logout-btn" onClick={logout} aria-label="Log out">
+          🚪 Logout
+        </button>
+      </div>
       <h2 className="superadmin-dashboard-title">SuperAdmin Dashboard</h2>
 
       {!showForm && (

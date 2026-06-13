@@ -1,75 +1,66 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import {
+  useEffect, useRef, useState, useCallback,
+  createContext, useContext,
+} from "react";
+import { useLocation } from "react-router-dom";
 import { FaceMesh } from "@mediapipe/face_mesh";
 import { Camera } from "@mediapipe/camera_utils";
 import { applyEmotionTheme } from "../utils/EmotionThemeMap";
 import { classifyEmotion, EMOTION_CLASSES } from "../utils/GeometricEmotion";
 
 /**
- * useEmotionDetection — FaceMesh + geometric expression classifier.
+ * Emotion detection — FaceMesh + geometric expression classifier.
  *
- * Emotion is computed LOCALLY from MediaPipe FaceMesh landmark geometry
- * (see utils/GeometricEmotion.js). This replaced the previous TFLite landmark
- * model, which systematically mislabeled smiles as "Angry" and neutral faces
- * as "Sad" because its training-time preprocessing could not be reproduced.
- * Running locally also means detection no longer depends on the Python ML
- * server being up.
+ * Architecture (persistent webcam):
+ *   The camera + classifier run in ONE place — <EmotionProvider>, mounted once
+ *   in App above the routes. Because the provider never unmounts while the app
+ *   is open, the webcam stays on across game navigation (no on/off flicker).
+ *   It is gated by route so the camera is only active inside the child games
+ *   area and is off on login / therapist / admin screens.
  *
- * Smoothing pipeline (unchanged, kept because it works well):
- *   • EMA over the geometric probability vector (smooth, confidence-aware)
- *   • Confidence threshold: frames below confThreshold are discarded
- *   • Hysteresis: a winner must persist holdFrames frames before it is reported
+ *   Games keep calling useEmotionDetection() exactly as before and receive the
+ *   same { emotion, confidence, videoRef, canvasRef, ... } shape — but emotion
+ *   comes from the shared provider and the refs they render are inert.
  *
- * Returns:
- *   emotion                — current smoothed emotion label
- *   confidence             — EMA-smoothed confidence for current emotion (0–1)
- *   sessionDominantEmotion — dominant emotion since last finalizeSession()
- *   finalizeSession()      — compute & store dominant, reset EMA state
- *   setManualEmotion(e)    — override detected emotion (null to resume)
- *   videoRef / canvasRef   — attach to hidden <video> and <canvas> elements
- *
- * Options (all optional):
- *   intervalTime  — ms between classifications (default 400)
- *   confThreshold — minimum EMA confidence to commit an emotion (default 0.5)
- *   holdFrames    — consecutive frames required before emotion changes (default 2)
- *   emaAlpha      — EMA weight for new observations (default 0.4)
+ * Emotion itself is computed locally from FaceMesh landmark geometry (see
+ * utils/GeometricEmotion.js) — no ML server required.
  */
 
 const NUM_CLASSES = EMOTION_CLASSES.length;
 
 // Landmark quality gate
-const LEFT_EYE_IDX  = 33;   // outer left eye corner
-const RIGHT_EYE_IDX = 263;  // outer right eye corner
-const MIN_IOD_PX    = 20;   // minimum inter-ocular distance (px) to accept a face
+const LEFT_EYE_IDX  = 33;
+const RIGHT_EYE_IDX = 263;
+const MIN_IOD_PX    = 20;
 
-const useEmotionDetection = ({
+// ── Internal hook: owns the camera + classification. Gated by `active`. ────────
+function useEmotionDetectionInternal({
+  active        = true,
   intervalTime  = 400,
   confThreshold = 0.5,
   holdFrames    = 2,
   emaAlpha      = 0.4,
-} = {}) => {
+} = {}) {
   const [emotion,                setEmotion]            = useState("Neutral");
   const [confidence,             setConfidence]         = useState(0);
   const [sessionDominantEmotion, setSessionDominant]    = useState("Neutral");
   const [manualEmotion,          setManualEmotionState] = useState(null);
 
-  // EMA state: smoothed probability vector over EMOTION_CLASSES
   const emaProbs       = useRef(null);
   const candidateLabel = useRef("Neutral");
   const holdCount      = useRef(0);
-
-  // Session accumulator — maps label → weighted confidence sum
   const sessionAccum   = useRef({});
 
   const videoRef           = useRef(null);
   const canvasRef          = useRef(null);
   const lastPredictionTime = useRef(0);
 
-  // ── Webcam + FaceMesh loop ──────────────────────────────────────────────────
   useEffect(() => {
+    if (!active) return;             // camera off outside the games area
+
     const video  = videoRef.current;
     const canvas = canvasRef.current;
     const ctx    = canvas?.getContext("2d");
-
     if (!video || !canvas || !ctx) return;
 
     const faceMesh = new FaceMesh({
@@ -95,22 +86,16 @@ const useEmotionDetection = ({
       if (now - lastPredictionTime.current < intervalTime) return;
       lastPredictionTime.current = now;
 
-      // ── Landmark quality gate ────────────────────────────────────────────
       const toPixel = (lm) => [lm.x * canvas.width, lm.y * canvas.height];
       const leftEyePx  = toPixel(landmarksArray[LEFT_EYE_IDX]);
       const rightEyePx = toPixel(landmarksArray[RIGHT_EYE_IDX]);
-      const iod = Math.hypot(
-        rightEyePx[0] - leftEyePx[0],
-        rightEyePx[1] - leftEyePx[1]
-      );
-      if (iod < MIN_IOD_PX) return; // face too small / occluded — skip
+      const iod = Math.hypot(rightEyePx[0] - leftEyePx[0], rightEyePx[1] - leftEyePx[1]);
+      if (iod < MIN_IOD_PX) return;
 
-      // ── Geometric emotion classification (local — no ML server required) ──
       const result = classifyEmotion(landmarksArray, canvas.width, canvas.height);
       if (!result || result.probabilities.length !== NUM_CLASSES) return;
       const probs = result.probabilities;
 
-      // ── EMA update ───────────────────────────────────────────────────────
       if (!emaProbs.current) {
         emaProbs.current = [...probs];
       } else {
@@ -123,14 +108,10 @@ const useEmotionDetection = ({
       const maxIdx  = emaProbs.current.indexOf(maxConf);
       const winner  = EMOTION_CLASSES[maxIdx];
 
-      // Accumulate for session dominant (weighted by confidence)
-      sessionAccum.current[winner] =
-        (sessionAccum.current[winner] || 0) + maxConf;
+      sessionAccum.current[winner] = (sessionAccum.current[winner] || 0) + maxConf;
 
-      // ── Confidence threshold ─────────────────────────────────────────────
-      if (maxConf < confThreshold) return; // too uncertain — keep last emotion
+      if (maxConf < confThreshold) return;
 
-      // ── Hysteresis ───────────────────────────────────────────────────────
       if (winner === candidateLabel.current) {
         holdCount.current++;
       } else {
@@ -150,18 +131,20 @@ const useEmotionDetection = ({
       height: 480,
     });
 
-    camera.start();
-    return () => camera.stop();
+    camera.start().catch(() => { /* camera unavailable — degrade silently */ });
+    return () => {
+      try { camera.stop(); } catch (_) {}
+      try { faceMesh.close(); } catch (_) {}
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [intervalTime, confThreshold, holdFrames, emaAlpha]);
+  }, [active, intervalTime, confThreshold, holdFrames, emaAlpha]);
 
-  // ── Apply emotion theme to document ────────────────────────────────────────
+  // Apply emotion theme as the (effective) emotion changes
   useEffect(() => {
     const effective = manualEmotion ?? emotion;
     applyEmotionTheme(effective);
   }, [emotion, manualEmotion]);
 
-  // ── Public API ──────────────────────────────────────────────────────────────
   const finalizeSession = useCallback(() => {
     const accum = sessionAccum.current;
     const dominant =
@@ -183,11 +166,65 @@ const useEmotionDetection = ({
   const effectiveEmotion = manualEmotion ?? emotion;
 
   return {
-    emotion:                effectiveEmotion,
+    emotion: effectiveEmotion,
     confidence,
     sessionDominantEmotion,
     finalizeSession,
     setManualEmotion,
+    videoRef,
+    canvasRef,
+  };
+}
+
+// ── Shared provider: runs one camera, gated to the child games area ────────────
+const EmotionContext = createContext(null);
+
+// Routes where the child-facing webcam should be active.
+const CAMERA_PATHS = new Set([
+  '/welcomepage', '/games', '/achievements',
+  '/wordpuzzleadventure', '/mathgame', '/quiz', '/syllabletapgame',
+  '/shapememorygame', '/letterbridge', '/mirrorword', '/phonemetap',
+  '/lettersound', '/confusableletter', '/ran', '/verbalmemory',
+  '/reading-fluency', '/sight-words', '/morphology-builder',
+]);
+
+export function EmotionProvider({ children }) {
+  const location = useLocation();
+  let hasToken = false;
+  try { hasToken = !!localStorage.getItem('token'); } catch (_) {}
+  const active = hasToken && CAMERA_PATHS.has(location.pathname);
+
+  const api = useEmotionDetectionInternal({ active });
+
+  return (
+    <EmotionContext.Provider value={api}>
+      {children}
+      {/* Single persistent hidden camera surface for the whole games area */}
+      <video  ref={api.videoRef}  autoPlay playsInline muted style={{ display: 'none' }} />
+      <canvas ref={api.canvasRef} width={640} height={480} style={{ display: 'none' }} />
+    </EmotionContext.Provider>
+  );
+}
+
+// ── Public hook used by every game (unchanged call sites) ──────────────────────
+const INERT = {
+  emotion: 'Neutral', confidence: 0, sessionDominantEmotion: 'Neutral',
+  finalizeSession: () => {}, setManualEmotion: () => {},
+};
+
+const useEmotionDetection = () => {
+  const ctx = useContext(EmotionContext);
+  // Inert refs so a game's <video ref={videoRef}> still renders harmlessly;
+  // the real camera lives in the provider.
+  const videoRef  = useRef(null);
+  const canvasRef = useRef(null);
+  const source = ctx ?? INERT;
+  return {
+    emotion:                source.emotion,
+    confidence:             source.confidence,
+    sessionDominantEmotion: source.sessionDominantEmotion,
+    finalizeSession:        source.finalizeSession,
+    setManualEmotion:       source.setManualEmotion,
     videoRef,
     canvasRef,
   };

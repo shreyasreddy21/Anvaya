@@ -222,3 +222,13 @@
 }
 
 .lsg-error { color: #991b1b; }
+
+/* Prompt with read-aloud button */
+.lsg-prompt-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.lsg-prompt { font-size: 1.3rem; font-weight: 600; }

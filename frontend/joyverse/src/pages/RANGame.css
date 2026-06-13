@@ -294,3 +294,26 @@
 }
 .ran-result-ans  { flex: 1; }
 .ran-result-time { font-size: 0.8rem; opacity: 0.75; white-space: nowrap; }
+
+/* ── Round 5: bigger category/difficulty + per-question feedback ── */
+.ran-select-group label { font-size: 1.2rem; font-weight: 700; }
+.ran-select-group select {
+  font-size: 1.15rem;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-family: inherit;
+  cursor: pointer;
+}
+.ran-feedback {
+  margin-top: 16px;
+  font-size: 1.5rem;
+  font-weight: 800;
+  text-align: center;
+  animation: ran-fb-pop 0.2s ease;
+}
+.ran-feedback--correct { color: #16a34a; }
+.ran-feedback--wrong   { color: #dc2626; }
+@keyframes ran-fb-pop {
+  from { opacity: 0; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1); }
+}

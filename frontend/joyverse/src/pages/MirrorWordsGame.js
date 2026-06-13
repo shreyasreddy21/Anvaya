@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import confetti from "canvas-confetti";
 import "./MirrorWordsGame.css";
 import useEmotionDetection from "../hooks/useEmotionDetection";
@@ -7,6 +7,21 @@ import TTSButton from "../components/TTSButton";
 import GameShell from "../components/GameShell";
 import { API_BASE } from '../config/api';
 import { getCardStyle } from '../utils/EmotionThemeMap';
+
+/** Render the question, enlarging/colouring the target letter or word in quotes. */
+function renderQuestion(text) {
+  if (!text) return null;
+  const m = text.match(/"([^"]+)"/);
+  if (!m) return <span>{text}</span>;
+  const [before, after] = text.split(m[0]);
+  return (
+    <>
+      <span>{before}</span>
+      <span className="mirror-target">{m[1]}</span>
+      <span>{after}</span>
+    </>
+  );
+}
 
 const MirrorWordsGame = () => {
   const { emotion, confidence, videoRef, canvasRef } = useEmotionDetection();
@@ -17,46 +32,58 @@ const MirrorWordsGame = () => {
   const [score, setScore] = useState(0);
   const [showResult, setShowResult] = useState(false);
   const [questions, setQuestions] = useState([]);
-    const cardStyle = getCardStyle(emotion);
+  const [displayOptions, setDisplayOptions] = useState([]);
+  const scoreRef = useRef(0);
+  const cardStyle = getCardStyle(emotion);
 
   const username = localStorage.getItem("username");
-  const { endSession } = useGameSessionLogger({ username, difficulty:level, expression: emotion ,score});
+  const { endSession } = useGameSessionLogger({ username, difficulty: level, expression: emotion, score });
+
   useEffect(() => {
-  const fetchQuestions = async () => {
-    try {
-      const res = await fetch(`${API_BASE}/api/mirrorquestions/${level}`);
-      const data = await res.json();
-      setQuestions(data);
-      setCurrent(0);
-      setSelected(null);
-      setFeedback("");
-      setScore(0);
-      setShowResult(false);
-    } catch (error) {
-      console.error("Error fetching questions:", error);
+    const fetchQuestions = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/mirrorquestions/${level}`);
+        const data = await res.json();
+        setQuestions(Array.isArray(data) ? data : []);
+        setCurrent(0);
+        setSelected(null);
+        setFeedback("");
+        setScore(0);
+        scoreRef.current = 0;
+        setShowResult(false);
+      } catch (error) {
+        console.error("Error fetching questions:", error);
+      }
+    };
+    fetchQuestions();
+  }, [level]);
+
+  const filteredQuestions = questions;
+
+  // Shuffle the options each time the question changes so position can't be
+  // memorised — the child must actually discriminate the correct glyph.
+  useEffect(() => {
+    const q = questions[current];
+    if (q?.options) {
+      setDisplayOptions([...q.options].sort(() => Math.random() - 0.5));
+    } else {
+      setDisplayOptions([]);
     }
-  };
-
-  fetchQuestions();
-}, [level]);
-
-const filteredQuestions = questions;
+  }, [current, questions]);
 
   const fireConfetti = () => {
-    confetti({
-      particleCount: 150,
-      spread: 70,
-      origin: { y: 0.6 },
-    });
+    confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
   };
 
   const handleSelect = (option) => {
+    if (selected) return;
     setSelected(option);
     const isCorrect = option === filteredQuestions[current].correct;
-
     if (isCorrect) {
       setFeedback("Correct! 🎉");
-      setScore((prev) => prev + 10);
+      const next = scoreRef.current + 10;
+      scoreRef.current = next;
+      setScore(next);
     } else {
       setFeedback("Incorrect ❌");
     }
@@ -72,12 +99,12 @@ const filteredQuestions = questions;
         } else {
           setShowResult(true);
           fireConfetti();
-          endSession(score);
+          endSession(scoreRef.current);
         }
-      }, 1000); // Delay in ms before moving to next question or result
-
+      }, 1200);
       return () => clearTimeout(timer);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected]);
 
   const handleLevelChange = (e) => {
@@ -86,6 +113,7 @@ const filteredQuestions = questions;
     setSelected(null);
     setFeedback("");
     setScore(0);
+    scoreRef.current = 0;
     setShowResult(false);
   };
 
@@ -94,77 +122,83 @@ const filteredQuestions = questions;
     setSelected(null);
     setFeedback("");
     setScore(0);
+    scoreRef.current = 0;
     setShowResult(false);
+    // Re-shuffle the first question's options
+    const q = questions[0];
+    if (q?.options) setDisplayOptions([...q.options].sort(() => Math.random() - 0.5));
   };
+
+  const currentQ = filteredQuestions[current];
 
   return (
     <GameShell title="Mirror Words" emotion={emotion} confidence={confidence}>
-    <div className="mirror-game-container" style={cardStyle}>
-      <div className="mirror-game-title">Mirror Words</div>
-      
-      <div className="mirror-level-selector">
-        <label htmlFor="level">Choose Level: </label>
-        <select id="level" value={level} onChange={handleLevelChange}>
-          <option value="Easy">🟢 Easy</option>
-          <option value="Medium">🟡 Medium</option>
-          <option value="Hard">🔴 Hard</option>
-        </select>
-      </div>
+      <div className="mirror-game-container" style={cardStyle}>
+        <div className="mirror-game-title">Mirror Words</div>
 
-      {!showResult ? (
-        <>
-          <div className="mirror-score">Score: {score}</div>
-          <div className="mirror-game-board">
-            <div className="mirror-game-question">
-              <span>{filteredQuestions[current]?.question}</span>
-              {filteredQuestions[current]?.question && (
-                <TTSButton
-                  text={filteredQuestions[current].question}
-                  label="Read question aloud"
-                  size="sm"
-                />
-              )}
+        <div className="mirror-level-selector">
+          <label htmlFor="level">Choose Level: </label>
+          <select id="level" value={level} onChange={handleLevelChange}>
+            <option value="Easy">🟢 Easy</option>
+            <option value="Medium">🟡 Medium</option>
+            <option value="Hard">🔴 Hard</option>
+          </select>
+        </div>
+
+        {!showResult ? (
+          <>
+            <div className="mirror-score">Score: {score}</div>
+            <div className="mirror-game-board">
+              <div className="mirror-game-question">
+                <span className="mirror-question-text">{renderQuestion(currentQ?.question)}</span>
+                {currentQ?.question && (
+                  <TTSButton
+                    text={currentQ.question}
+                    label="Read question aloud"
+                    size="sm"
+                  />
+                )}
+              </div>
+              <div className="mirror-options">
+                {displayOptions.map((option, index) => {
+                  let stateClass = "";
+                  if (selected) {
+                    if (option === currentQ.correct) stateClass = "correct";
+                    else if (option === selected) stateClass = "incorrect";
+                  }
+                  return (
+                    <button
+                      key={index}
+                      className={`mirror-option ${selected === option ? "selected" : ""} ${stateClass}`}
+                      onClick={() => handleSelect(option)}
+                      disabled={!!selected}
+                    >
+                      {option}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-            <div className="mirror-options">
-              {filteredQuestions[current]?.options.map((option, index) => (
-                <button
-                  key={index}
-                  className={`mirror-option ${
-                    selected === option ? "selected" : ""
-                  }`}
-                  onClick={() => handleSelect(option)}
-                  disabled={!!selected}
-                >
-                  {option}
-                </button>
-              ))}
-            </div>
-          </div>
-          {feedback && (
-              <div
-                className={`mirror-feedback ${
-                  feedback === "Correct! 🎉" ? "correct" : "incorrect"
-                }`}
-              >
+            {feedback && (
+              <div className={`mirror-feedback ${feedback === "Correct! 🎉" ? "correct" : "incorrect"}`}>
                 {feedback}
               </div>
             )}
-          
-        </>
-      ) : (
-        <div className="mirror-final-score">
-          <h2>Level Completed!</h2>
-          <br></br>
-          <p>Your Final Score: {score}</p>
-          <br></br>
-          <button className="mirror-reset-button" onClick={resetGame}>
-            Play Again
-          </button>
-        </div>
-      )}
-      <video ref={videoRef} autoPlay style={{ display: "none" }} />
-      <canvas ref={canvasRef} width={640} height={480} style={{ display: "none" }} />
-    </div>
+          </>
+        ) : (
+          <div className="mirror-final-score">
+            <h2>Level Completed!</h2>
+            <br />
+            <p>Your Final Score: {score}</p>
+            <br />
+            <button className="mirror-reset-button" onClick={resetGame}>
+              Play Again
+            </button>
+          </div>
+        )}
+        <video ref={videoRef} autoPlay style={{ display: "none" }} />
+        <canvas ref={canvasRef} width={640} height={480} style={{ display: "none" }} />
+      </div>
     </GameShell>
   );
 };

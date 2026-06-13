@@ -226,12 +226,13 @@ export default function MorphologyGame() {
         setSelectedOption(null);
         setAnswered(false);
       }
-    }, 1500);
+    }, 2200);
   }, [answered, currentQ, questions, score, difficulty, username]);
 
   useEffect(() => {
     return () => {
       if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current);
+      SpeechService.stop(); // never let narration bleed past leaving the game
     };
   }, []);
 
@@ -242,7 +243,11 @@ export default function MorphologyGame() {
         <div className="mg-container">
           <div className="gs-card" style={cardStyle}>
             <h1 className="gs-card__title">Word Builder 🧩</h1>
-            <p className="mg-setup-desc">Learn how words are built from parts!</p>
+            <p className="mg-setup-desc">
+              Words are built from parts — a beginning (prefix), an ending (suffix),
+              and a root.<br />
+              Spot the parts and discover what each one means!
+            </p>
             <div className="mg-diff-row">
               {[
                 { val: 'prefixes', label: '📌 Prefixes Only', desc: 'un-, re-, pre-...' },

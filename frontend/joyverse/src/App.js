@@ -1,9 +1,11 @@
-import React, { Suspense, lazy } from "react";
+import React, { Suspense, lazy, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import "./App.css";
 import { AccessibilityProvider, useAccessibility } from "./context/AccessibilityContext";
 import AccessibilitySettingsModal from "./components/AccessibilitySettingsModal";
 import ErrorBoundary from "./components/ErrorBoundary";
+import SpeechService from "./services/SpeechService";
+import { EmotionProvider } from "./hooks/useEmotionDetection";
 
 // Routed pages are code-split so the login screen no longer downloads every
 // game's code up front. Each chunk loads on demand behind <Suspense>.
@@ -62,6 +64,13 @@ function AccessibilityFAB() {
 /** Routes wrapped in an error boundary that auto-resets when the path changes. */
 function AppRoutes() {
   const location = useLocation();
+
+  // Stop any in-progress speech whenever the route changes, so TTS never
+  // bleeds from one screen (or a closed game) into the next.
+  useEffect(() => {
+    SpeechService.stop();
+  }, [location.pathname]);
+
   return (
     <ErrorBoundary resetKey={location.pathname} homeHref="/games">
       <Suspense fallback={<RouteLoading />}>
@@ -115,11 +124,13 @@ function App() {
   return (
     <AccessibilityProvider>
       <Router>
-        <AppRoutes />
+        <EmotionProvider>
+          <AppRoutes />
 
-        {/* Global accessibility modal + FAB rendered on every route */}
-        <AccessibilitySettingsModal />
-        <AccessibilityFAB />
+          {/* Global accessibility modal + FAB rendered on every route */}
+          <AccessibilitySettingsModal />
+          <AccessibilityFAB />
+        </EmotionProvider>
       </Router>
     </AccessibilityProvider>
   );

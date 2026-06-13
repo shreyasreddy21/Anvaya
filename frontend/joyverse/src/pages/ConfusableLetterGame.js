@@ -125,6 +125,9 @@ export default function ConfusableLetterGame() {
       SpeechService.speak(`Not quite — the answer is ${current.correct}.`, { rate: 0.85 });
     }
 
+    // Let the spoken feedback finish before advancing (longer when incorrect),
+    // so the next question's narration doesn't cut across it.
+    const advanceDelay = isCorrect ? 1800 : 2800;
     setTimeout(() => {
       const nextIdx = currentIdx + 1;
       if (nextIdx >= questions.length) {
@@ -133,7 +136,7 @@ export default function ConfusableLetterGame() {
         setCurrentIdx(nextIdx);
         setSelected(null);
       }
-    }, 1400);
+    }, advanceDelay);
   };
 
   const finishGame = (allEvents) => {

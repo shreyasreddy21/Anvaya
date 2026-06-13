@@ -451,3 +451,18 @@
 .vsm-btn:hover  { opacity: 0.88; }
 .vsm-btn:active { transform: scale(0.97); }
 .vsm-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+/* ── Round 5: larger game contents + text ── */
+.vsm-phase-title { font-size: clamp(1.7rem, 5vw, 2.6rem); }
+.vsm-phase-sub   { font-size: 1.2rem; }
+.vsm-intro       { font-size: 1.2rem; line-height: 1.55; }
+.vsm-listen-tiles .vsm-tile,
+.vsm-sequence-bar span,
+.vsm-pos { font-size: clamp(2rem, 5vw, 3rem) !important; }
+.vsm-pool-grid button,
+.vsm-recall-prompt { font-size: clamp(1.5rem, 4vw, 2.2rem); }
+.vsm-recall-prompt { font-weight: 700; }
+.vsm-select-group label { font-size: 1.15rem; font-weight: 700; }
+.vsm-select-group select { font-size: 1.1rem; padding: 8px 14px; border-radius: 10px; }
+.vsm-listen-hint, .vsm-feedback-hint { font-size: 1.2rem; }
+.vsm-btn { font-size: 1.1rem; }

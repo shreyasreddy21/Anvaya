@@ -301,3 +301,26 @@ body {
   cursor: not-allowed;
   pointer-events: none;
 }
+
+/* Dashboard top bar + logout (therapist / superadmin) */
+.dashboard-topbar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 16px 0;
+}
+.dashboard-logout-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 12px;
+  border: 2px solid rgba(185, 28, 28, 0.35);
+  background: rgba(255, 255, 255, 0.9);
+  color: #b91c1c;
+  font-family: var(--font-opendyslexic, inherit);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+.dashboard-logout-btn:hover { transform: translateY(-2px); filter: brightness(1.03); }

@@ -21,6 +21,32 @@
 
 import { API_BASE } from '../config/api';
 
+// Selectable espeak-ng voices (id → friendly label). Kept in sync with the
+// allowlist in backend/Routes/tts.js. All are built-in (no extra install).
+export const TTS_VOICES = [
+  { id: 'en-us+f3',    label: 'US English — Female' },
+  { id: 'en-us+m3',    label: 'US English — Male' },
+  { id: 'en-us+f5',    label: 'Soft Female' },
+  { id: 'en-us+m7',    label: 'Warm Male' },
+  { id: 'en-gb+f3',    label: 'British — Female' },
+  { id: 'en-gb-x-rp',  label: 'British — Posh' },
+  { id: 'en-029',      label: 'Caribbean' },
+];
+
+export const DEFAULT_TTS_VOICE = 'en-us+f3';
+const _VOICE_IDS = new Set(TTS_VOICES.map(v => v.id));
+
+// Read the child's chosen voice from the persisted accessibility settings.
+function _currentVoice() {
+  try {
+    const raw = localStorage.getItem('joyverse-a11y');
+    const v = raw ? JSON.parse(raw).ttsVoice : null;
+    return _VOICE_IDS.has(v) ? v : DEFAULT_TTS_VOICE;
+  } catch (_) {
+    return DEFAULT_TTS_VOICE;
+  }
+}
+
 // ── Module state ───────────────────────────────────────────────────────────────
 let _voicesReady   = false;
 let _serverTtsOk   = null;   // null = untried, true = works, false = unavailable
@@ -142,7 +168,9 @@ function _speakServer(cleanText, opts, onServerFail) {
   // Map Web-Speech-style rate (1 = normal) to espeak words-per-minute.
   const wpm   = Math.min(250, Math.max(80, Math.round(150 * rate)));
   const ePitch = Math.min(99, Math.max(0, Math.round(50 * pitch)));
-  const url = `${API_BASE}/api/tts?text=${encodeURIComponent(cleanText)}&rate=${wpm}&pitch=${ePitch}`;
+  const voice = _currentVoice();
+  const url = `${API_BASE}/api/tts?text=${encodeURIComponent(cleanText)}`
+    + `&rate=${wpm}&pitch=${ePitch}&voice=${encodeURIComponent(voice)}`;
 
   const audio = new Audio();
   audio.src = url;
