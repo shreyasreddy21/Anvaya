@@ -18,3 +18,6 @@ workingScreenshots/
 # Abandoned / large ML model binaries (kept on disk, not in git)
 *.pth
 *.tflite
+
+# Transient NTFS/FUSE artifacts (open handles to deleted files)
+.fuse_hidden*
