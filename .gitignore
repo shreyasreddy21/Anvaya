@@ -1,5 +1,8 @@
 .env
 backend/.env
+.env.production
+.env.local
+nginx/certs/
 
 # Python virtual environments
 .venv/
@@ -12,7 +15,7 @@ __pycache__/
 node_modules/
 frontend/joyverse/build/
 
-# Dev screenshots (docs only — keep out of the repo)
+# Dev screenshots (docs only -- keep out of the repo)
 workingScreenshots/
 
 # Abandoned / large ML model binaries (kept on disk, not in git)
