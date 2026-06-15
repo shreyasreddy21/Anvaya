@@ -59,10 +59,19 @@ describe('BlendshapeEmotion', () => {
     expect(r.emotion).toBe('Surprise');
   });
 
-  it('always returns a normalized 5-class probability vector', () => {
+  it('always returns a normalized 6-class probability vector', () => {
     const r = classifyFromBlendshapes(bs({ mouthSmileLeft: 0.5, mouthSmileRight: 0.5 }));
-    expect(r.probabilities).toHaveLength(5);
+    expect(r.probabilities).toHaveLength(6); // Angry, Confused, Happy, Neutral, Sad, Surprise
     const sum = r.probabilities.reduce((a, b) => a + b, 0);
     expect(sum).toBeCloseTo(1, 5);
+  });
+
+  it('classifies asymmetric brow + half-open mouth as Confused', () => {
+    const r = classifyFromBlendshapes(bs({
+      browOuterUpLeft:  0.6, browOuterUpRight:  0.05,
+      eyeSquintLeft:    0.5, eyeSquintRight:    0.05,
+      jawOpen: 0.3,
+    }));
+    expect(r.emotion).toBe('Confused');
   });
 });
