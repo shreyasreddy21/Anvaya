@@ -96,13 +96,15 @@ router.get('/:childUsername',
       const frustrationTrend = (gameSessions || [])
         .filter(s => s.expressions && s.expressions.length > 0)
         .map(s => {
-          const total = s.expressions.length;
-          const angry = s.expressions.filter(e => e.expression === 'angry').length;
-          const sad   = s.expressions.filter(e => e.expression === 'sad').length;
+          const total    = s.expressions.length;
+          const angry    = s.expressions.filter(e => e.expression === 'angry').length;
+          const sad      = s.expressions.filter(e => e.expression === 'sad').length;
+          const confused = s.expressions.filter(e => e.expression === 'confused').length;
           return {
             date: s.createdAt,
-            angryPct: Math.round((angry / total) * 100),
-            sadPct:   Math.round((sad   / total) * 100),
+            angryPct:    Math.round((angry    / total) * 100),
+            sadPct:      Math.round((sad      / total) * 100),
+            confusedPct: Math.round((confused / total) * 100),
             game: s.gameName,
           };
         });

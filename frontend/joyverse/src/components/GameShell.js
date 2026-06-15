@@ -8,6 +8,7 @@ const EMOTION_EMOJI = {
   Angry:   '😠',
   Surprise:'😲',
   Neutral: '😊',
+  Confused:'🤔',
 };
 
 /**

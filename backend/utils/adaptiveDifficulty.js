@@ -71,7 +71,7 @@ export function frustrationFromExpressions(expressions = []) {
   let negative = 0;
   for (const e of expressions) {
     const label = (typeof e === 'string' ? e : e?.expression || '').toLowerCase();
-    if (label === 'angry' || label === 'sad') negative++;
+    if (label === 'angry' || label === 'sad' || label === 'confused') negative++;
   }
   return negative / expressions.length;
 }

@@ -41,19 +41,20 @@ const NUM_CLASSES = EMOTION_CLASSES.length;
 function useEmotionDetectionInternal({
   active        = true,
   intervalTime  = 400,
-  confThreshold = 0.5,
-  holdFrames    = 2,
-  emaAlpha      = 0.4,
+  confThreshold = 0.42,
+  holdFrames    = 1,
+  emaAlpha      = 0.45,
 } = {}) {
   const [emotion,                setEmotion]            = useState("Neutral");
   const [confidence,             setConfidence]         = useState(0);
   const [sessionDominantEmotion, setSessionDominant]    = useState("Neutral");
   const [manualEmotion,          setManualEmotionState] = useState(null);
 
-  const emaProbs       = useRef(null);
-  const candidateLabel = useRef("Neutral");
-  const holdCount      = useRef(0);
-  const sessionAccum   = useRef({});
+  const emaProbs        = useRef(null);
+  const candidateLabel  = useRef("Neutral");
+  const holdCount       = useRef(0);
+  const sessionAccum    = useRef({});
+  const manualEmotionRef = useRef(null);
 
   const videoRef           = useRef(null);
   const canvasRef          = useRef(null);
@@ -61,6 +62,12 @@ function useEmotionDetectionInternal({
 
   useEffect(() => {
     if (!active) return;             // camera off outside the games area
+
+    // Reset smoothing state so stale values from a previous session don't bleed in
+    emaProbs.current       = null;
+    candidateLabel.current = 'Neutral';
+    holdCount.current      = 0;
+    sessionAccum.current   = {};
 
     const video = videoRef.current;
     if (!video) return;
@@ -99,7 +106,7 @@ function useEmotionDetectionInternal({
         holdCount.current      = 1;
       }
 
-      if (holdCount.current >= holdFrames && !manualEmotion) {
+      if (holdCount.current >= holdFrames && !manualEmotionRef.current) {
         setEmotion(winner);
         setConfidence(Math.round(maxConf * 100) / 100);
       }
@@ -177,6 +184,7 @@ function useEmotionDetectionInternal({
   }, []);
 
   const setManualEmotion = useCallback((label) => {
+    manualEmotionRef.current = label;
     setManualEmotionState(label);
     if (label) setEmotion(label);
   }, []);

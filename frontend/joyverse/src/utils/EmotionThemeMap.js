@@ -72,6 +72,19 @@ export const EmotionThemeMap = {
     },
     cardStyle: { backgroundColor: '#FFDAB9', color: '#4B0082' },
   },
+  Confused: {
+    backgroundImage: "url('/gameBackgrounds/neutral.jpg')",
+    backgroundColor: '#f0eeff',
+    cssVars: {
+      '--card-color':       '#E0D7FF',
+      '--button-bg':        '#C9BFFF',
+      '--button-hover-bg':  '#b8acf5',
+      '--button-text':      '#2d1b69',
+      '--text-color':       '#2d1b69',
+      '--score-color':      '#C9BFFF',
+    },
+    cardStyle: { backgroundColor: '#E0D7FF', color: '#2d1b69' },
+  },
 };
 
 /** Inline React style for a game card based on detected emotion. */

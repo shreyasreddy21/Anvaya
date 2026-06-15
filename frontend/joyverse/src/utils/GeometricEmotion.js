@@ -20,7 +20,7 @@
  * horizontal distances are comparable.
  */
 
-export const EMOTION_CLASSES = ['Angry', 'Happy', 'Neutral', 'Sad', 'Surprise'];
+export const EMOTION_CLASSES = ['Angry', 'Confused', 'Happy', 'Neutral', 'Sad', 'Surprise'];
 
 // MediaPipe FaceMesh landmark indices
 const IDX = {
@@ -49,7 +49,7 @@ function dist(a, b) {
  * @returns {object|null} feature object, or null if landmarks are unusable
  */
 export function computeFeatures(landmarks, width = 640, height = 480) {
-  if (!landmarks || landmarks.length < 468) return null;
+  if (!landmarks || landmarks.length < 478) return null;
   const P = (i) => {
     const lm = landmarks[i];
     if (!lm) return null;
@@ -82,14 +82,19 @@ export function computeFeatures(landmarks, width = 640, height = 480) {
   const eyeOpen = (((lEyeBot[1] - lEyeTop[1]) + (rEyeBot[1] - rEyeTop[1])) / 2) / faceH;
 
   // Eyebrow raise: gap between eyebrow and eye top (larger = raised)
-  const browRaise = (((lEyeTop[1] - lBrow[1]) + (rEyeTop[1] - rBrow[1])) / 2) / faceH;
+  const lBrowGap = (lEyeTop[1] - lBrow[1]) / faceH;
+  const rBrowGap = (rEyeTop[1] - rBrow[1]) / faceH;
+  const browRaise = (lBrowGap + rBrowGap) / 2;
+
+  // Asymmetric brow: one side raised significantly more than the other — confused signal
+  const asymBrowGeom = Math.abs(lBrowGap - rBrowGap);
 
   // Inner-brow vertical gap (small = brows lowered, anger) and horizontal
   // distance between inner brows (small = furrowed together, anger)
   const innerBrowGap  = (((lEyeTop[1] - lBrowIn[1]) + (rEyeTop[1] - rBrowIn[1])) / 2) / faceH;
   const innerBrowDist = dist(lBrowIn, rBrowIn) / faceH;
 
-  return { smile, mouthOpen, mouthW, eyeOpen, browRaise, innerBrowGap, innerBrowDist };
+  return { smile, mouthOpen, mouthW, eyeOpen, browRaise, asymBrowGeom, innerBrowGap, innerBrowDist };
 }
 
 // Sharpening factor for the softmax — makes a clear expression confidently
@@ -127,9 +132,9 @@ export function classifyEmotion(landmarks, width = 640, height = 480) {
 
   // SAD — mouth corners pulled down, narrowed eyes, inner brow raised (oblique).
   const sad =
-      26 * pos(-f.smile - 0.012)
-    + 14 * pos(0.05 - f.eyeOpen)
-    +  8 * pos(f.innerBrowGap - 0.155);
+      34 * pos(-f.smile - 0.010)
+    + 18 * pos(0.05 - f.eyeOpen)
+    + 10 * pos(f.innerBrowGap - 0.150);
 
   // ANGRY — inner brows lowered and drawn together, lips pressed; killed by smile.
   const angry =
@@ -138,12 +143,20 @@ export function classifyEmotion(landmarks, width = 640, height = 480) {
     +  6 * pos(0.03 - f.mouthOpen)
     - 30 * pos(f.smile - 0.025);
 
+  // CONFUSED — asymmetric brow is the primary cue (one up, one neutral/down).
+  // Suppressed by smiling and wide mouth open (that's surprise).
+  const confused =
+      20 * pos(f.asymBrowGeom - 0.018)
+    - 25 * pos(f.smile - 0.025)
+    - 15 * pos(f.mouthOpen - 0.12);
+
   // NEUTRAL — constant floor; wins when nothing else is strongly expressed.
   const neutral = 1.0;
 
-  // Order must match EMOTION_CLASSES: [Angry, Happy, Neutral, Sad, Surprise]
+  // Order must match EMOTION_CLASSES: [Angry, Confused, Happy, Neutral, Sad, Surprise]
   const scores = [
     pos(angry),
+    pos(confused),
     pos(happy),
     neutral,
     pos(sad),
