@@ -3,7 +3,7 @@ import { classifyEmotion, computeFeatures } from './GeometricEmotion';
 
 // A plausible neutral face in MediaPipe-normalized [0,1] coordinates.
 // Only the landmark indices the classifier actually reads are set; the rest
-// default to face-centre. Passed through classifyEmotion with a 640×480 frame.
+// default to face-centre. Passed through classifyEmotion with a 640x480 frame.
 const NEUTRAL = {
   10:  [0.50, 0.20],  // forehead
   152: [0.50, 0.85],  // chin
@@ -47,7 +47,7 @@ describe('GeometricEmotion', () => {
   });
 
   it('REGRESSION: a smile is never read as Angry or Sad', () => {
-    // This was the original production bug (smiles → Angry, neutral → Sad).
+    // This was the original production bug (smiles -> Angry, neutral -> Sad).
     const r = classify({ 61: [0.40, 0.64], 291: [0.60, 0.64] });
     expect(r.emotion).not.toBe('Angry');
     expect(r.emotion).not.toBe('Sad');
@@ -70,7 +70,7 @@ describe('GeometricEmotion', () => {
 
   it('always returns a normalized probability vector', () => {
     const r = classify();
-    expect(r.probabilities).toHaveLength(5);
+    expect(r.probabilities).toHaveLength(6);
     const sum = r.probabilities.reduce((a, b) => a + b, 0);
     expect(sum).toBeCloseTo(1, 5);
   });
