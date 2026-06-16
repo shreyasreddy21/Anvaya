@@ -112,47 +112,57 @@ function useEmotionDetectionInternal({
       }
     };
 
+    // Start the camera FIRST so the browser permission prompt always fires as
+    // soon as consent is granted. The onFrame callback no-ops until the model
+    // is ready, so model loading (below) is fully decoupled — a slow or failed
+    // model load can never prevent the camera from turning on.
+    camera = new Camera(video, {
+      onFrame: async () => {
+        if (!landmarker || cancelled || video.readyState < 2) return;
+        const now = Date.now();
+        if (now - lastPredictionTime.current < intervalTime) return;
+        lastPredictionTime.current = now;
+
+        let results;
+        try { results = landmarker.detectForVideo(video, performance.now()); }
+        catch (_) { return; }
+
+        const categories = results?.faceBlendshapes?.[0]?.categories;
+        let result = null;
+        if (categories && categories.length) {
+          result = classifyFromBlendshapes(categories);
+        } else if (results?.faceLandmarks?.[0]) {
+          // Fallback to the proven geometric classifier if no blendshapes.
+          result = classifyEmotion(results.faceLandmarks[0], 640, 480);
+        }
+        ingest(result);
+      },
+      width:  640,
+      height: 480,
+    });
+    camera.start().catch((err) => {
+      // Camera unavailable (denied permission / insecure context / no device).
+      // Surface it for diagnosis instead of failing completely silently.
+      console.warn('[emotion] camera start failed:', err);
+    });
+
+    // Load the on-device vision model in parallel. Only the model files come
+    // from the CDN — no user data is sent. A failure here degrades emotion
+    // sensing to off, but leaves the camera running.
     (async () => {
       try {
-        // Loaded on demand (only after consent activates the camera), keeping
-        // the vision runtime out of the initial bundle.
         const { FaceLandmarker, FilesetResolver } = await import('@mediapipe/tasks-vision');
         const fileset = await FilesetResolver.forVisionTasks(MP_WASM);
-        landmarker = await FaceLandmarker.createFromOptions(fileset, {
+        const lm = await FaceLandmarker.createFromOptions(fileset, {
           baseOptions: { modelAssetPath: MP_MODEL, delegate: 'CPU' },
           outputFaceBlendshapes: true,
           runningMode: 'VIDEO',
           numFaces: 1,
         });
-        if (cancelled) { try { landmarker.close(); } catch (_) {} return; }
-
-        camera = new Camera(video, {
-          onFrame: async () => {
-            if (!landmarker || cancelled || video.readyState < 2) return;
-            const now = Date.now();
-            if (now - lastPredictionTime.current < intervalTime) return;
-            lastPredictionTime.current = now;
-
-            let results;
-            try { results = landmarker.detectForVideo(video, performance.now()); }
-            catch (_) { return; }
-
-            const categories = results?.faceBlendshapes?.[0]?.categories;
-            let result = null;
-            if (categories && categories.length) {
-              result = classifyFromBlendshapes(categories);
-            } else if (results?.faceLandmarks?.[0]) {
-              // Fallback to the proven geometric classifier if no blendshapes.
-              result = classifyEmotion(results.faceLandmarks[0], 640, 480);
-            }
-            ingest(result);
-          },
-          width:  640,
-          height: 480,
-        });
-        camera.start().catch(() => { /* camera unavailable — degrade silently */ });
-      } catch (_) {
-        // tasks-vision / model failed to load — emotion sensing degrades silently
+        if (cancelled) { try { lm.close(); } catch (_) {} return; }
+        landmarker = lm;
+      } catch (err) {
+        console.warn('[emotion] vision model failed to load:', err);
       }
     })();
 
