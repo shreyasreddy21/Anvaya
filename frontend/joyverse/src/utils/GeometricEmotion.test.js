@@ -70,7 +70,7 @@ describe('GeometricEmotion', () => {
 
   it('always returns a normalized probability vector', () => {
     const r = classify();
-    expect(r.probabilities).toHaveLength(5);
+    expect(r.probabilities).toHaveLength(6);
     const sum = r.probabilities.reduce((a, b) => a + b, 0);
     expect(sum).toBeCloseTo(1, 5);
   });
