@@ -1,4 +1,4 @@
-name: CI / CD -- Build, Test & Deploy
+name: CI / CD — Build, Test & Deploy
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  # -- Backend tests -----------------------------------------------------------
+  # ── Backend tests ─────────────────────────────────────────────────────────
   test-backend:
     name: Backend Tests
     runs-on: ubuntu-latest
@@ -19,16 +19,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-      - run: npm install
+          cache: "npm"
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
       - run: npm test
         env:
           NODE_ENV: test
           JWT_SECRET: test_secret_at_least_32_characters_long
           MONGO_URI: mongodb://localhost:27017/joyverse_test
 
-  # -- Frontend build ----------------------------------------------------------
+  # ── Frontend tests & build ────────────────────────────────────────────────
   test-frontend:
-    name: Frontend Build
+    name: Frontend Tests & Build
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -38,12 +40,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-      - run: npm install --legacy-peer-deps
+          cache: "npm"
+          cache-dependency-path: frontend/joyverse/package-lock.json
+      - run: npm ci
+      - run: npm test
       - run: npm run build
         env:
-          REACT_APP_API_URL: https://joyv.it.com
+          REACT_APP_API_URL: https://yourdomain.com
 
-  # -- Transformer build -------------------------------------------------------
+  # ── Transformer build ─────────────────────────────────────────────────────
   test-transformer:
     name: Transformer Build
     runs-on: ubuntu-latest
@@ -55,12 +60,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-      - run: npm install --legacy-peer-deps
+          cache: "npm"
+          cache-dependency-path: transformer/facemesh/my-facemesh-app/package-lock.json
+      - run: npm ci
       - run: npm run build
         env:
-          REACT_APP_API_URL: https://joyv.it.com
+          REACT_APP_API_URL: https://yourdomain.com
 
-  # -- Docker build & push -----------------------------------------------------
+  # ── Docker build & push ───────────────────────────────────────────────────
   docker:
     name: Build & Push Docker Images
     runs-on: ubuntu-latest
@@ -109,7 +116,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  # -- Deploy to VPS via SSH ---------------------------------------------------
+  # ── Deploy to VPS via SSH ─────────────────────────────────────────────────
   deploy:
     name: Deploy to Production
     runs-on: ubuntu-latest
@@ -123,8 +130,17 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            set -e
             cd /opt/anvaya
-            git pull origin main
-            docker compose --env-file .env.production pull
-            docker compose --env-file .env.production up -d --build --remove-orphans
+            # Force the server to the exact committed state. Discards any stray
+            # local edits (e.g. the temporary nginx config from manual setup)
+            # that would otherwise make `git pull` fail silently and leave the
+            # deploy building from stale source. .env.production and
+            # nginx/certs are gitignored, so they are preserved.
+            git fetch origin main
+            git reset --hard origin/main
+            # Tear down completely so no orphaned/old container keeps port
+            # 80/443 (which is what was still serving the FaceMesh app).
+            docker compose --env-file .env.production down --remove-orphans
+            docker compose --env-file .env.production up -d --build --force-recreate
             docker image prune -f
