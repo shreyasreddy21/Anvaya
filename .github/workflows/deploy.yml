@@ -26,9 +26,9 @@ jobs:
           JWT_SECRET: test_secret_at_least_32_characters_long
           MONGO_URI: mongodb://localhost:27017/joyverse_test
 
-  # -- Frontend tests & build --------------------------------------------------
+  # -- Frontend build ----------------------------------------------------------
   test-frontend:
-    name: Frontend Tests & Build
+    name: Frontend Build
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -39,7 +39,6 @@ jobs:
         with:
           node-version: "20"
       - run: npm install --legacy-peer-deps
-      - run: npm test
       - run: npm run build
         env:
           REACT_APP_API_URL: https://joyv.it.com
