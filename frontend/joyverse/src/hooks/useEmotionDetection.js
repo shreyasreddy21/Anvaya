@@ -115,7 +115,10 @@ function useEmotionDetectionInternal({
     // Start the camera FIRST so the browser permission prompt always fires as
     // soon as consent is granted. The onFrame callback no-ops until the model
     // is ready, so model loading (below) is fully decoupled — a slow or failed
-    // model load can never prevent the camera from turning on.
+    // model load can never prevent the camera from turning on. Everything here
+    // is wrapped so a failure can only disable emotion sensing — never crash the
+    // app (this provider sits above all routes).
+    try {
     camera = new Camera(video, {
       onFrame: async () => {
         if (!landmarker || cancelled || video.readyState < 2) return;
@@ -145,6 +148,9 @@ function useEmotionDetectionInternal({
       // Surface it for diagnosis instead of failing completely silently.
       console.warn('[emotion] camera start failed:', err);
     });
+    } catch (err) {
+      console.warn('[emotion] camera setup failed:', err);
+    }
 
     // Load the on-device vision model in parallel. Only the model files come
     // from the CDN — no user data is sent. A failure here degrades emotion

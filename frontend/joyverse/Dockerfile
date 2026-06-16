@@ -7,9 +7,15 @@ RUN npm ci --legacy-peer-deps
 
 COPY . .
 
-# REACT_APP_API_URL must be passed at build time:
-#   docker build --build-arg REACT_APP_API_URL=https://api.yourdomain.com .
-ARG REACT_APP_API_URL=http://localhost:4000
+# REACT_APP_API_URL is OPTIONAL at build time.
+#   • If set (e.g. --build-arg REACT_APP_API_URL=https://joyv.it.com), the app
+#     calls that origin directly.
+#   • If left empty (the default), the app uses SAME-ORIGIN relative requests
+#     ('/api/...'), which the nginx reverse proxy forwards to the backend. This
+#     is the safe production default — see src/config/api.js. We intentionally do
+#     NOT default to http://localhost:4000, which would bake the visitor's own
+#     machine into the build and break every API call behind HTTPS.
+ARG REACT_APP_API_URL=
 ENV REACT_APP_API_URL=$REACT_APP_API_URL
 
 RUN npm run build
