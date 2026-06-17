@@ -8,6 +8,7 @@ import { applyEmotionTheme } from "../utils/EmotionThemeMap";
 import { classifyEmotion, EMOTION_CLASSES } from "../utils/GeometricEmotion";
 import { classifyFromBlendshapes } from "../utils/BlendshapeEmotion";
 import { getConsent, CONSENT_EVENT } from "../utils/cameraConsent";
+import { cameraUnavailableReason, describeCameraIssue } from "../utils/cameraSupport";
 
 // MediaPipe Face Landmarker assets (loaded on-device; only model files come
 // from the CDN — no user data is ever sent). Pinned to the installed version.
@@ -71,6 +72,14 @@ function useEmotionDetectionInternal({
 
     const video = videoRef.current;
     if (!video) return;
+
+    // Hard requirement: getUserMedia needs a secure context. Bail early with a
+    // precise reason instead of letting the camera fail silently in prod.
+    const blockReason = cameraUnavailableReason();
+    if (blockReason) {
+      console.warn('[emotion] camera unavailable —', describeCameraIssue(blockReason));
+      return;
+    }
 
     let camera = null;
     let landmarker = null;

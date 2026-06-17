@@ -63,7 +63,13 @@ export default function FaceMeshDemo() {
       const normalized = flatPoints.map(val => val / maxAbs);
 
       try {
-        const res = await fetch("http://localhost:5000/predict", {
+        // Configurable, defaults to SAME-ORIGIN '/predict'. The old hardcoded
+        // http://localhost:5000 was mixed content on an HTTPS page (blocked by
+        // the browser) and pointed at the visitor's own machine. The video keeps
+        // rendering regardless of whether the prediction backend is reachable.
+        const PREDICT_URL =
+          (process.env.REACT_APP_PREDICT_URL || "").replace(/\/$/, "") + "/predict";
+        const res = await fetch(PREDICT_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ landmarks: normalized }),
@@ -77,6 +83,17 @@ export default function FaceMeshDemo() {
   }
 });
 
+    // getUserMedia requires a secure context (HTTPS or localhost). Surface the
+    // reason instead of failing silently when served over plain HTTP.
+    if (!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia !== "function") {
+      setEmotion(
+        window.isSecureContext === false
+          ? "Camera needs a secure (https://) connection."
+          : "This browser does not support camera access."
+      );
+      return;
+    }
+
     const camera = new Camera(video, {
       onFrame: async () => {
         await faceMesh.send({ image: video });
@@ -84,7 +101,18 @@ export default function FaceMeshDemo() {
       width: 640,
       height: 480,
     });
-    camera.start();
+    camera.start().catch((err) => {
+      console.error("Camera start failed:", err);
+      setEmotion(
+        err && (err.name === "NotAllowedError" || err.name === "SecurityError")
+          ? "Camera access was blocked — allow it in your browser and reload."
+          : "The camera could not be started."
+      );
+    });
+
+    return () => {
+      try { camera.stop(); } catch (_) {}
+    };
   }, []);
 
   return (

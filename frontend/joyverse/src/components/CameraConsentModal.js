@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { getConsent, setConsent, CONSENT_EVENT } from '../utils/cameraConsent';
+import { requestCameraStream, describeCameraIssue } from '../utils/cameraSupport';
 import './CameraConsentModal.css';
 
 // Paths that make up the child games area (mirrors EmotionProvider).
@@ -21,6 +22,8 @@ const GAME_PATHS = new Set([
 export default function CameraConsentModal() {
   const location = useLocation();
   const [choice, setChoice] = useState(getConsent());
+  const [busy, setBusy]   = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const onChange = () => setChoice(getConsent());
@@ -33,6 +36,26 @@ export default function CameraConsentModal() {
 
   const shouldAsk = hasToken && choice == null && GAME_PATHS.has(location.pathname);
   if (!shouldAsk) return null;
+
+  // Trigger the real browser permission prompt from inside the click (a user
+  // gesture — the reliable way to get it to appear). Only record consent once
+  // the camera actually starts; otherwise show exactly why it didn't.
+  const allow = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      const stream = await requestCameraStream();
+      // Release this probe stream immediately; the EmotionProvider opens its
+      // own camera now that permission is granted (no second prompt).
+      stream.getTracks().forEach((t) => t.stop());
+      setConsent('granted');
+    } catch (err) {
+      console.warn('[camera-consent] permission/probe failed:', err);
+      setError(describeCameraIssue(err));
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <div className="cc-overlay" role="dialog" aria-modal="true" aria-labelledby="cc-title">
@@ -48,11 +71,16 @@ export default function CameraConsentModal() {
           <li>🚫 No video or pictures are <strong>ever sent or saved</strong>.</li>
           <li>🎚️ You can turn it on or off anytime in Settings.</li>
         </ul>
+        {error && (
+          <p className="cc-error" role="alert" style={{ color: '#b91c1c', margin: '0 0 8px' }}>
+            {error}
+          </p>
+        )}
         <div className="cc-actions">
-          <button className="cc-btn cc-btn--allow" onClick={() => setConsent('granted')}>
-            Turn it on
+          <button className="cc-btn cc-btn--allow" onClick={allow} disabled={busy}>
+            {busy ? 'Starting camera…' : 'Turn it on'}
           </button>
-          <button className="cc-btn cc-btn--deny" onClick={() => setConsent('denied')}>
+          <button className="cc-btn cc-btn--deny" onClick={() => setConsent('denied')} disabled={busy}>
             Not now
           </button>
         </div>
