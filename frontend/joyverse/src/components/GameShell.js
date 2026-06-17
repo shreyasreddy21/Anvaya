@@ -1,5 +1,8 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import EmotionBackground from './EmotionBackground';
+import GameBuddy from './GameBuddy';
+import { BuddyContext } from './BuddyContext';
 import './GameShell.css';
 
 const EMOTION_EMOJI = {
@@ -22,6 +25,13 @@ const EMOTION_EMOJI = {
  */
 export default function GameShell({ title, emotion, confidence, children }) {
   const navigate = useNavigate();
+
+  // The single shared "learning buddy". Games signal correct/wrong by rendering
+  // <FeedbackGif result="…" /> (a context controller); games that don't simply
+  // show the calm "working" companion. Either way the buddy is consistent
+  // everywhere. setResult from useState is stable, so the context value is too.
+  const [buddyResult, setBuddyResult] = useState(null);
+  const buddyCtx = useMemo(() => ({ setResult: setBuddyResult }), []);
 
   return (
     <div className="game-shell">
@@ -49,8 +59,17 @@ export default function GameShell({ title, emotion, confidence, children }) {
       </nav>
 
       <main className="game-shell__content">
-        {children}
+        {/* Dynamic, dyslexia-friendly background that fades with the detected
+            emotion. The game content renders clearly above it. */}
+        <EmotionBackground emotion={emotion || 'Neutral'}>
+          <BuddyContext.Provider value={buddyCtx}>
+            {children}
+          </BuddyContext.Provider>
+        </EmotionBackground>
       </main>
+
+      {/* One shared buddy for every game — driven by BuddyContext above. */}
+      <GameBuddy result={buddyResult} />
     </div>
   );
 }

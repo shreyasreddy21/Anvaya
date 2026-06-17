@@ -75,9 +75,9 @@
 .game-shell__content {
   flex: 1;
   display: flex;
-  align-items: center;
+  align-items: stretch;      /* let EmotionBackground fill the content area */
   justify-content: center;
-  padding: 20px;
+  padding: 0;                /* padding now lives in .emotion-bg__content */
   box-sizing: border-box;
 }
 

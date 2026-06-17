@@ -1,28 +1,29 @@
-import React from 'react';
-import successGif from '../assets/successGif.gif';
-import failureGif from '../assets/failureGif.gif';
-import './FeedbackGif.css';
+import { useEffect } from 'react';
+import { useBuddy } from './BuddyContext';
 
 /**
- * FeedbackGif — a brief, fun GIF that pops up on a correct/incorrect answer.
+ * FeedbackGif — feedback *controller* (renders nothing visible).
  *
- * Drop-in and stateless: it renders only while `result` is truthy, so it rides
- * on a game's EXISTING feedback state (which already shows + clears on a timer).
- * It's an overlay with pointer-events: none, so it never blocks gameplay.
- *
+ * Kept as a drop-in with the same API the games already use:
  *   <FeedbackGif result={isCorrect ? 'correct' : answered ? 'wrong' : null} />
+ *
+ * Instead of drawing its own GIF, it forwards the result to the single buddy
+ * that GameShell renders (GameBuddy), so the companion is consistent across
+ * every game and there is never a duplicate floating GIF. Anything that isn't an
+ * explicit answer state clears the result, returning the buddy to its calm
+ * "working" companion. Outside a GameShell it is a harmless no-op.
  */
 export default function FeedbackGif({ result }) {
-  if (result !== 'correct' && result !== 'wrong') return null;
-  const isCorrect = result === 'correct';
-  return (
-    <div className="feedback-gif-overlay" aria-hidden="true">
-      <img
-        key={result}
-        src={isCorrect ? successGif : failureGif}
-        alt=""
-        className={`feedback-gif-img feedback-gif-img--${result}`}
-      />
-    </div>
-  );
+  const { setResult } = useBuddy();
+  const norm = result === 'correct' || result === 'wrong' ? result : null;
+
+  useEffect(() => {
+    setResult(norm);
+  }, [norm, setResult]);
+
+  // Clear the result when the game (or this feedback view) unmounts, so the
+  // buddy falls back to "working" rather than getting stuck on correct/wrong.
+  useEffect(() => () => setResult(null), [setResult]);
+
+  return null;
 }

@@ -1,0 +1,76 @@
+/* EmotionBackground — subtle, tiling, dyslexia-friendly emotion background.
+   See EmotionBackground.js for the behavioural contract. */
+
+.emotion-bg {
+  position: relative;
+  /* Fill the flex slot it's dropped into (e.g. GameShell content) */
+  flex: 1 1 auto;
+  align-self: stretch;
+  width: 100%;
+  min-height: 100%;
+  display: flex;
+  overflow: hidden;          /* keep tiled pattern clipped to the section */
+  isolation: isolate;        /* contain stacking so z-index stays local */
+}
+
+/* ── Background layers (decorative, never interactive) ───────────────────── */
+.emotion-bg__pattern,
+.emotion-bg__tint {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.emotion-bg__pattern {
+  background-repeat: repeat;        /* seamless tiling — never stretched */
+  background-position: top left;
+  background-size: 320px auto;      /* fixed tile; responsive overrides below */
+  opacity: var(--eb-pattern-opacity, 0.12);
+}
+
+/* Incoming pattern fades in over the current one (true crossfade is handled by
+   keeping the base layer underneath until the timer promotes this one). */
+.emotion-bg__pattern--in {
+  opacity: var(--eb-pattern-opacity, 0.12);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .emotion-bg__pattern--in {
+    animation: eb-fade-in var(--eb-fade, 650ms) ease forwards;
+  }
+}
+@keyframes eb-fade-in {
+  from { opacity: 0; }
+  to   { opacity: var(--eb-pattern-opacity, 0.12); }
+}
+
+.emotion-bg__tint {
+  opacity: var(--eb-tint-opacity, 0.10);
+  /* background-color IS transitionable — this carries the smooth colour shift */
+  transition: background-color var(--eb-fade, 650ms) ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .emotion-bg__tint { transition: none; }
+}
+
+/* ── Foreground: the game card sits clearly above the background ─────────── */
+.emotion-bg__content {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* ── Responsive tile sizing ─────────────────────────────────────────────── */
+@media (max-width: 1024px) {            /* tablet */
+  .emotion-bg__pattern { background-size: 260px auto; }
+}
+@media (max-width: 600px) {             /* mobile */
+  .emotion-bg__pattern { background-size: 180px auto; }
+  .emotion-bg__content { padding: 12px; }
+}

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './ReportPage.css';
 import { LoadingState, ErrorBanner } from '../components/LoadingState';
+import AIProgressSummary from '../components/AIProgressSummary';
 import { API_BASE } from '../config/api';
 
 const MOOD_COLORS = {
@@ -107,6 +108,9 @@ export default function ReportPage() {
           </div>
         </div>
       </section>
+
+      {/* AI-written progress narrative, grounded in this child's data */}
+      <AIProgressSummary childUsername={childUsername} />
 
       {/* Reading Progression */}
       <section className="report-section">
