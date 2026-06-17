@@ -61,12 +61,54 @@ export function describeCameraIssue(reasonOrError) {
  * success; rejects with an Error whose `.name` is suitable for describeCameraIssue.
  * The caller is responsible for stopping the returned stream's tracks.
  */
-export async function requestCameraStream() {
+export async function requestCameraStream({ width = 640, height = 480 } = {}) {
   const reason = cameraUnavailableReason();
   if (reason) {
     const err = new Error(reason);
     err.name = reason;
     throw err;
   }
-  return navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+  return navigator.mediaDevices.getUserMedia({
+    video: { width: { ideal: width }, height: { ideal: height }, facingMode: 'user' },
+    audio: false,
+  });
+}
+
+/**
+ * Drive a hidden <video> from the camera and invoke `onFrame` once per animation
+ * frame. This is a dependency-free replacement for @mediapipe/camera_utils's
+ * `Camera`: its UMD bundle exports an `undefined` `Camera` under the Vite/Rollup
+ * PRODUCTION build (`TypeError: Camera is not a constructor`) even though it
+ * resolves in dev — so we use the platform APIs directly instead. tasks-vision's
+ * FaceLandmarker only needs raw <video> frames, which this provides.
+ *
+ * Returns a handle `{ stop() }`. `onFrame` receives no arguments and should read
+ * the video element it was given. Per-frame errors are swallowed so a single bad
+ * frame can never kill the loop.
+ */
+export async function startCameraPump(video, { onFrame, width = 640, height = 480 } = {}) {
+  const stream = await requestCameraStream({ width, height });
+  video.srcObject = stream;
+  // The element is muted + playsInline; play() actually starts the frames.
+  try { await video.play(); } catch (_) { /* some browsers autoplay; rAF still ticks */ }
+
+  let stopped = false;
+  let rafId = 0;
+  const tick = async () => {
+    if (stopped) return;
+    if (typeof onFrame === 'function' && video.readyState >= 2) {
+      try { await onFrame(); } catch (_) { /* never let one frame break the loop */ }
+    }
+    rafId = requestAnimationFrame(tick);
+  };
+  rafId = requestAnimationFrame(tick);
+
+  return {
+    stop() {
+      stopped = true;
+      if (rafId) cancelAnimationFrame(rafId);
+      try { stream.getTracks().forEach((t) => t.stop()); } catch (_) {}
+      try { video.srcObject = null; } catch (_) {}
+    },
+  };
 }

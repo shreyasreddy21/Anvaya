@@ -3,12 +3,11 @@ import {
   createContext, useContext,
 } from "react";
 import { useLocation } from "react-router-dom";
-import { Camera } from "@mediapipe/camera_utils";
 import { applyEmotionTheme } from "../utils/EmotionThemeMap";
 import { classifyEmotion, EMOTION_CLASSES } from "../utils/GeometricEmotion";
 import { classifyFromBlendshapes } from "../utils/BlendshapeEmotion";
 import { getConsent, CONSENT_EVENT } from "../utils/cameraConsent";
-import { cameraUnavailableReason, describeCameraIssue } from "../utils/cameraSupport";
+import { cameraUnavailableReason, describeCameraIssue, startCameraPump } from "../utils/cameraSupport";
 
 // MediaPipe Face Landmarker assets (loaded on-device; only model files come
 // from the CDN — no user data is ever sent). Pinned to the installed version.
@@ -81,7 +80,7 @@ function useEmotionDetectionInternal({
       return;
     }
 
-    let camera = null;
+    let pump = null;
     let landmarker = null;
     let cancelled = false;
 
@@ -121,14 +120,15 @@ function useEmotionDetectionInternal({
       }
     };
 
-    // Start the camera FIRST so the browser permission prompt always fires as
-    // soon as consent is granted. The onFrame callback no-ops until the model
-    // is ready, so model loading (below) is fully decoupled — a slow or failed
-    // model load can never prevent the camera from turning on. Everything here
-    // is wrapped so a failure can only disable emotion sensing — never crash the
-    // app (this provider sits above all routes).
-    try {
-    camera = new Camera(video, {
+    // Start the camera FIRST so the browser permission prompt fires as soon as
+    // consent is granted. The onFrame callback no-ops until the model is ready,
+    // so model loading (below) is fully decoupled — a slow or failed model load
+    // can never prevent the camera from turning on. Uses startCameraPump (native
+    // getUserMedia + rAF) rather than @mediapipe/camera_utils, whose UMD `Camera`
+    // export is undefined in the production bundle ("Camera is not a constructor").
+    startCameraPump(video, {
+      width:  640,
+      height: 480,
       onFrame: async () => {
         if (!landmarker || cancelled || video.readyState < 2) return;
         const now = Date.now();
@@ -149,17 +149,17 @@ function useEmotionDetectionInternal({
         }
         ingest(result);
       },
-      width:  640,
-      height: 480,
-    });
-    camera.start().catch((err) => {
-      // Camera unavailable (denied permission / insecure context / no device).
-      // Surface it for diagnosis instead of failing completely silently.
-      console.warn('[emotion] camera start failed:', err);
-    });
-    } catch (err) {
-      console.warn('[emotion] camera setup failed:', err);
-    }
+    })
+      .then((handle) => {
+        // If the effect already cleaned up while getUserMedia was pending,
+        // immediately release the stream we just acquired.
+        if (cancelled) handle.stop();
+        else pump = handle;
+      })
+      .catch((err) => {
+        // Permission denied / insecure context / no device. Surfaced, not silent.
+        console.warn('[emotion] camera start failed —', describeCameraIssue(err), err);
+      });
 
     // Load the on-device vision model in parallel. Only the model files come
     // from the CDN — no user data is sent. A failure here degrades emotion
@@ -183,7 +183,7 @@ function useEmotionDetectionInternal({
 
     return () => {
       cancelled = true;
-      try { camera?.stop(); } catch (_) {}
+      try { pump?.stop(); } catch (_) {}
       try { landmarker?.close(); } catch (_) {}
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

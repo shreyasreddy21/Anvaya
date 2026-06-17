@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { FaceMesh } from "@mediapipe/face_mesh";
-import { Camera } from "@mediapipe/camera_utils";
+// NOTE: intentionally NOT using @mediapipe/camera_utils. Its UMD `Camera` export
+// can resolve to undefined in a production bundle ("Camera is not a constructor").
+// We drive the video with native getUserMedia + requestAnimationFrame instead.
 
 export default function FaceMeshDemo() {
   const videoRef = useRef(null);
@@ -94,24 +96,40 @@ export default function FaceMeshDemo() {
       return;
     }
 
-    const camera = new Camera(video, {
-      onFrame: async () => {
-        await faceMesh.send({ image: video });
-      },
-      width: 640,
-      height: 480,
-    });
-    camera.start().catch((err) => {
-      console.error("Camera start failed:", err);
-      setEmotion(
-        err && (err.name === "NotAllowedError" || err.name === "SecurityError")
-          ? "Camera access was blocked — allow it in your browser and reload."
-          : "The camera could not be started."
-      );
-    });
+    let stream = null;
+    let rafId = 0;
+    let stopped = false;
+
+    navigator.mediaDevices
+      .getUserMedia({ video: { width: 640, height: 480, facingMode: "user" }, audio: false })
+      .then(async (s) => {
+        if (stopped) { s.getTracks().forEach((t) => t.stop()); return; }
+        stream = s;
+        video.srcObject = s;
+        try { await video.play(); } catch (_) {}
+        const tick = async () => {
+          if (stopped) return;
+          if (video.readyState >= 2) {
+            try { await faceMesh.send({ image: video }); } catch (_) {}
+          }
+          rafId = requestAnimationFrame(tick);
+        };
+        rafId = requestAnimationFrame(tick);
+      })
+      .catch((err) => {
+        console.error("Camera start failed:", err);
+        setEmotion(
+          err && (err.name === "NotAllowedError" || err.name === "SecurityError")
+            ? "Camera access was blocked — allow it in your browser and reload."
+            : "The camera could not be started."
+        );
+      });
 
     return () => {
-      try { camera.stop(); } catch (_) {}
+      stopped = true;
+      if (rafId) cancelAnimationFrame(rafId);
+      try { if (stream) stream.getTracks().forEach((t) => t.stop()); } catch (_) {}
+      try { video.srcObject = null; } catch (_) {}
     };
   }, []);
 
