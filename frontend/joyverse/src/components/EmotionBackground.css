@@ -26,22 +26,13 @@
   background-repeat: repeat;        /* seamless tiling — never stretched */
   background-position: top left;
   background-size: 320px auto;      /* fixed tile; responsive overrides below */
-  opacity: var(--eb-pattern-opacity, 0.12);
+  /* Per-layer opacity is set inline (0 or target); this transition carries the
+     smooth two-layer crossfade and can be interrupted/retargeted cleanly. */
+  transition: opacity var(--eb-fade, 650ms) ease;
+  will-change: opacity;
 }
-
-/* Incoming pattern fades in over the current one (true crossfade is handled by
-   keeping the base layer underneath until the timer promotes this one). */
-.emotion-bg__pattern--in {
-  opacity: var(--eb-pattern-opacity, 0.12);
-}
-@media (prefers-reduced-motion: no-preference) {
-  .emotion-bg__pattern--in {
-    animation: eb-fade-in var(--eb-fade, 650ms) ease forwards;
-  }
-}
-@keyframes eb-fade-in {
-  from { opacity: 0; }
-  to   { opacity: var(--eb-pattern-opacity, 0.12); }
+@media (prefers-reduced-motion: reduce) {
+  .emotion-bg__pattern { transition: none; }
 }
 
 .emotion-bg__tint {

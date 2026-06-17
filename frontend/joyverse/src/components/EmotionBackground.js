@@ -8,12 +8,18 @@ import './EmotionBackground.css';
  *
  * Design goals (per spec):
  *   • Pattern image per emotion, REPEATED (tiled) — never stretched.
- *   • 500–800ms crossfade between emotions (a tint layer that transitions its
- *     colour, plus a second pattern layer that fades in over the current one).
+ *   • 500–800ms crossfade between emotions.
  *   • Low contrast (pattern ~12% / tint ~10% opacity) so it never competes with
  *     the readable game card above it.
  *   • Responsive tile sizing for desktop / tablet / mobile.
  *   • Honors prefers-reduced-motion (instant swap, no animation).
+ *
+ * Crossfade design (robust to rapid/oscillating emotion changes):
+ *   Two PERSISTENT pattern layers crossfade by transitioning CSS opacity. On an
+ *   emotion change we paint the new image onto the hidden ("back") layer and flip
+ *   which layer is visible. There are no remounts and no timers, so the visible
+ *   layer always shows a valid pattern (it never blanks out) and always reflects
+ *   the latest emotion — even if emotions change faster than the fade duration.
  *
  * Missing image files degrade gracefully: the pattern layer simply shows nothing
  * and the tint alone provides the emotional cue — nothing breaks.
@@ -58,49 +64,41 @@ export default function EmotionBackground({
 
   const current = norm(emotion);
 
-  // `base` is the settled pattern; `incoming` (when set) fades in over it, then
-  // a timer promotes it to `base`. Decoupling pattern (not CSS-transitionable)
-  // from the tint (which IS colour-transitionable) keeps the crossfade smooth.
-  const [base, setBase] = useState(current);
-  const [incoming, setIncoming] = useState(null);
+  // Two persistent crossfading layers. `frontB` says which layer is currently
+  // visible; the other (hidden) layer is the one we repaint before flipping.
+  const [layerA, setLayerA] = useState(current);
+  const [layerB, setLayerB] = useState(null);
+  const [frontB, setFrontB] = useState(false);
   const prev = useRef(current);
-  const timer = useRef(null);
+  const frontBRef = useRef(false);
 
   useEffect(() => {
     if (current === prev.current) return;
     prev.current = current;
-    setIncoming(current);
-    clearTimeout(timer.current);
-    timer.current = setTimeout(() => {
-      setBase(current);
-      setIncoming(null);
-    }, FADE_MS + 60);
-    return () => clearTimeout(timer.current);
-  }, [current]);
 
-  useEffect(() => () => clearTimeout(timer.current), []);
+    // Paint the new pattern onto the hidden (about-to-become-front) layer, then
+    // flip. No remount, no timer → the crossfade can be interrupted/retargeted
+    // smoothly by the browser without ever blanking the visible layer.
+    const nextFrontB = !frontBRef.current;
+    if (nextFrontB) setLayerB(current);
+    else setLayerA(current);
+    frontBRef.current = nextFrontB;
+    setFrontB(nextFrontB);
+  }, [current]);
 
   const rootStyle = {
     '--eb-fade': `${FADE_MS}ms`,
-    '--eb-pattern-opacity': patternOpacity,
     '--eb-tint-opacity': tintOpacity,
   };
+  const layerStyle = (emo, visible) => ({
+    backgroundImage: emo ? url(emo) : 'none',
+    opacity: visible ? patternOpacity : 0,
+  });
 
   return (
     <div className={`emotion-bg ${className}`.trim()} data-emotion={current} style={rootStyle}>
-      <div
-        className="emotion-bg__pattern"
-        style={{ backgroundImage: url(base) }}
-        aria-hidden="true"
-      />
-      {incoming && (
-        <div
-          key={incoming}
-          className="emotion-bg__pattern emotion-bg__pattern--in"
-          style={{ backgroundImage: url(incoming) }}
-          aria-hidden="true"
-        />
-      )}
+      <div className="emotion-bg__pattern" style={layerStyle(layerA, !frontB)} aria-hidden="true" />
+      <div className="emotion-bg__pattern" style={layerStyle(layerB, frontB)} aria-hidden="true" />
       <div
         className="emotion-bg__tint"
         style={{ backgroundColor: conf(current).tint }}
