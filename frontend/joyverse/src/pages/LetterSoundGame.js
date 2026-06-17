@@ -6,6 +6,7 @@ import useGameSessionLogger from '../hooks/useGameSessionLogger';
 import GameShell from '../components/GameShell';
 import FeedbackGif from '../components/FeedbackGif';
 import TTSButton from '../components/TTSButton';
+import AdaptiveDifficultyPrompt from '../components/AdaptiveDifficultyPrompt';
 import SpeechService from '../services/SpeechService';
 import { PHONICS_LEVEL_ORDER, PhonicsLevelMeta } from '../constants/PhonicsLevel';
 import axios from 'axios';
@@ -225,6 +226,12 @@ export default function LetterSoundGame() {
                   </div>
                 ))}
               </div>
+              <AdaptiveDifficultyPrompt
+                gameKey="lettersound"
+                current={difficulty}
+                enabled={gameOver}
+                onApply={(d) => { setDifficulty(d); loadQuestions(phonicsLevel, d); }}
+              />
               <button className="lsg-btn lsg-btn--primary" onClick={() => loadQuestions(phonicsLevel, difficulty)}>
                 Play Again
               </button>

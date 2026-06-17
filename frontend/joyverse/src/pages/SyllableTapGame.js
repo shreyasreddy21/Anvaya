@@ -6,6 +6,7 @@ import useGameSessionLogger from "../hooks/useGameSessionLogger";
 import TTSButton from "../components/TTSButton";
 import GameShell from "../components/GameShell";
 import FeedbackGif from "../components/FeedbackGif";
+import AdaptiveDifficultyPrompt from "../components/AdaptiveDifficultyPrompt";
 import { API_BASE } from '../config/api';
 // const hardcodedWords = {
 //   easy: [
@@ -211,6 +212,12 @@ const handleDifficultyChange = (e) => {
         <div className="game-complete">
           <p>You completed all words in <strong>{difficulty}</strong> mode!</p>
           <p>Your score: {score}/{wordPool.length * 20}</p>
+          <AdaptiveDifficultyPrompt
+            gameKey="syllabletapgame"
+            current={difficulty}
+            enabled={gameComplete}
+            onApply={(d) => fetchWords(d)}
+          />
           <div className="button-group">
             <button onClick={repeatGame} className="game-button">🔁 Repeat All Words</button>
           </div>

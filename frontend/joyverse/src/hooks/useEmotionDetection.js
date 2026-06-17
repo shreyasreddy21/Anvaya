@@ -8,6 +8,11 @@ import { classifyEmotion, EMOTION_CLASSES } from "../utils/GeometricEmotion";
 import { classifyFromBlendshapes } from "../utils/BlendshapeEmotion";
 import { getConsent, CONSENT_EVENT } from "../utils/cameraConsent";
 import { cameraUnavailableReason, describeCameraIssue, startCameraPump } from "../utils/cameraSupport";
+import { getBaseline, saveBaseline, createBaselineCollector, applyBaseline } from "../utils/emotionCalibration";
+
+// A face smaller than this fraction of the frame height yields unreliable
+// landmarks/blendshapes — skip those frames rather than feed the classifier noise.
+const MIN_FACE_RATIO = 0.16;
 
 // MediaPipe Face Landmarker assets (loaded on-device; only model files come
 // from the CDN — no user data is ever sent). Pinned to the installed version.
@@ -41,9 +46,9 @@ const NUM_CLASSES = EMOTION_CLASSES.length;
 function useEmotionDetectionInternal({
   active        = true,
   intervalTime  = 400,
-  confThreshold = 0.42,
-  holdFrames    = 1,
-  emaAlpha      = 0.45,
+  confThreshold = 0.38,  // slightly more sensitive: children's expressions sit between classes
+  holdFrames    = 2,     // require 2 consecutive frames so blinks/yawns don't flip the label
+  emaAlpha      = 0.5,   // a touch more responsive to genuine changes
 } = {}) {
   const [emotion,                setEmotion]            = useState("Neutral");
   const [confidence,             setConfidence]         = useState(0);
@@ -83,6 +88,12 @@ function useEmotionDetectionInternal({
     let pump = null;
     let landmarker = null;
     let cancelled = false;
+
+    // Per-child calibration: load this child's stored neutral baseline; if none
+    // exists yet, collect one from the first calm frames of this session.
+    const calibUser  = (() => { try { return localStorage.getItem('username'); } catch { return null; } })();
+    let baseline     = getBaseline(calibUser);
+    let collector    = baseline ? null : createBaselineCollector();
 
     // Shared post-classification pipeline (EMA → hysteresis → state).
     // Unchanged from the previous implementation — only the source of the
@@ -139,13 +150,33 @@ function useEmotionDetectionInternal({
         try { results = landmarker.detectForVideo(video, performance.now()); }
         catch (_) { return; }
 
+        const landmarks = results?.faceLandmarks?.[0];
+
+        // Frame-quality gate: if the face is too small (child far from camera)
+        // the landmarks/blendshapes are unreliable — skip rather than misclassify.
+        if (landmarks && landmarks[10] && landmarks[152]) {
+          const faceRatio = Math.abs(landmarks[152].y - landmarks[10].y);
+          if (faceRatio < MIN_FACE_RATIO) return;
+        }
+
         const categories = results?.faceBlendshapes?.[0]?.categories;
         let result = null;
         if (categories && categories.length) {
-          result = classifyFromBlendshapes(categories);
-        } else if (results?.faceLandmarks?.[0]) {
+          // While calibrating, fold this frame into the neutral baseline.
+          if (collector) {
+            const stillCollecting = collector.add(categories);
+            if (!stillCollecting) {
+              baseline = collector.finalize();
+              saveBaseline(calibUser, baseline);
+              collector = null;
+            }
+          }
+          // Classify deviations from THIS child's resting face (no-op until a
+          // baseline exists, so detection still works during calibration).
+          result = classifyFromBlendshapes(applyBaseline(categories, baseline));
+        } else if (landmarks) {
           // Fallback to the proven geometric classifier if no blendshapes.
-          result = classifyEmotion(results.faceLandmarks[0], 640, 480);
+          result = classifyEmotion(landmarks, 640, 480);
         }
         ingest(result);
       },

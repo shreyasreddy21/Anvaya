@@ -5,6 +5,7 @@ import useEmotionDetection from "../hooks/useEmotionDetection";
 import useGameSessionLogger from "../hooks/useGameSessionLogger";
 import TTSButton from "../components/TTSButton";
 import GameShell from "../components/GameShell";
+import AdaptiveDifficultyPrompt from "../components/AdaptiveDifficultyPrompt";
 import PhonicsContentService from "../services/PhonicsContentService";
 import { PHONICS_LEVEL_ORDER, PhonicsLevelMeta } from "../constants/PhonicsLevel";
 import { getCardStyle } from '../utils/EmotionThemeMap';
@@ -209,6 +210,12 @@ const LetterBridge = () => {
             <div className="game-over">
               <h2>⏰ Time's Up!</h2>
               <p>Your final score: <strong>{score}</strong></p>
+              <AdaptiveDifficultyPrompt
+                gameKey="letterbridge"
+                current={difficulty}
+                enabled={gameOver}
+                onApply={(d) => { setDifficulty(d); initializeGame(phonicsLevel, d); }}
+              />
               <button className="game-btn" onClick={handleRestart}>Play Again</button>
             </div>
           )}

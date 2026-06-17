@@ -4,6 +4,7 @@ import './RANGame.css';
 import useEmotionDetection from '../hooks/useEmotionDetection';
 import useGameSessionLogger from '../hooks/useGameSessionLogger';
 import GameShell from '../components/GameShell';
+import AdaptiveDifficultyPrompt from '../components/AdaptiveDifficultyPrompt';
 import SpeechService from '../services/SpeechService';
 import axios from 'axios';
 import { API_BASE } from '../config/api';
@@ -306,6 +307,12 @@ export default function RANGame() {
                 </div>
               </details>
 
+              <AdaptiveDifficultyPrompt
+                gameKey="ran"
+                current={difficulty}
+                enabled={gameState === 'done'}
+                onApply={(d) => { setDifficulty(d); startRound(category, d); }}
+              />
               <div className="ran-replay-row">
                 <button className="ran-btn ran-btn--primary"
                   onClick={() => startRound(category, difficulty)}>

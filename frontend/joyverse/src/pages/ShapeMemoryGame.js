@@ -4,6 +4,7 @@ import useEmotionDetection from "../hooks/useEmotionDetection";
 import useGameSessionLogger from "../hooks/useGameSessionLogger";
 import GameShell from "../components/GameShell";
 import TTSButton from "../components/TTSButton";
+import AdaptiveDifficultyPrompt from "../components/AdaptiveDifficultyPrompt";
 
 const shapes = ["⬤", "▲", "■", "★"];
 const totalTiles = 16;
@@ -183,6 +184,12 @@ function ShapeMemoryGame() {
             <p className="smg-result-text">
               {score === totalTarget ? "🎉 You Win!" : clicksLeft <= 0 ? "❌ No more chances!" : "⏰ Time's Up!"}
             </p>
+            <AdaptiveDifficultyPrompt
+              gameKey="shapememorygame"
+              current={level}
+              enabled={isGameOver}
+              onApply={(d) => setLevel(d)}
+            />
             <button onClick={setupGame} className="smg-reset-button">Play Again</button>
           </div>
         )}

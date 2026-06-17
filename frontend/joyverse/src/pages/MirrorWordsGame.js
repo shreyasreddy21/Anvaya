@@ -6,6 +6,7 @@ import useGameSessionLogger from "../hooks/useGameSessionLogger";
 import TTSButton from "../components/TTSButton";
 import GameShell from "../components/GameShell";
 import FeedbackGif from "../components/FeedbackGif";
+import AdaptiveDifficultyPrompt from "../components/AdaptiveDifficultyPrompt";
 import { API_BASE } from '../config/api';
 import { getCardStyle } from '../utils/EmotionThemeMap';
 
@@ -193,6 +194,20 @@ const MirrorWordsGame = () => {
             <br />
             <p>Your Final Score: {score}</p>
             <br />
+            <AdaptiveDifficultyPrompt
+              gameKey="mirrorword"
+              current={level}
+              enabled={showResult}
+              onApply={(lvl) => {
+                setLevel(lvl);
+                setCurrent(0);
+                setSelected(null);
+                setFeedback("");
+                setScore(0);
+                scoreRef.current = 0;
+                setShowResult(false);
+              }}
+            />
             <button className="mirror-reset-button" onClick={resetGame}>
               Play Again
             </button>
