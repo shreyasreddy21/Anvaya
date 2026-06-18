@@ -194,3 +194,28 @@
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* ── Read-aloud description on each game card ───────────────────────────────── */
+.games-page-card { position: relative; }
+
+.games-page-card-desc {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #3730a3;
+  opacity: 0.92;
+  font-family: var(--font-opendyslexic);
+}
+
+.games-page-card-tts {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+}
+
+@media (max-width: 700px) {
+  .games-page-card-desc { font-size: 0.74rem; margin-top: 6px; }
+}

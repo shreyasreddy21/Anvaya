@@ -53,8 +53,8 @@ export default function EmotionBackground({
   children,
   basePath = '/emotionPatterns/',
   theme,
-  patternOpacity = 0.12,
-  tintOpacity = 0.10,
+  patternOpacity = 0.30,
+  tintOpacity = 0.15,
   className = '',
 }) {
   const merged = { ...DEFAULT_THEME, ...(theme || {}) };

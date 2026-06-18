@@ -11,6 +11,10 @@
   display: flex;
   overflow: hidden;          /* keep tiled pattern clipped to the section */
   isolation: isolate;        /* contain stacking so z-index stays local */
+  /* Opaque base so the pattern + tint always sit on ONE consistent surface,
+     instead of whatever shifting layer (old cover photo / body) is behind the
+     game area. This is what keeps every emotion's background looking consistent. */
+  background-color: var(--color-beige, #f6f1e8);
 }
 
 /* ── Background layers (decorative, never interactive) ───────────────────── */
