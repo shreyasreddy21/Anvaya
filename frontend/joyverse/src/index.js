@@ -5,6 +5,7 @@ import App from './App';
 import SpeechService from './services/SpeechService';
 import "./pages/global.css";
 import axios from 'axios';
+import { clearSession } from './utils/session';
 
 // Pre-warm TTS voices early so first speak() call has them ready
 SpeechService.init();
@@ -24,9 +25,7 @@ axios.interceptors.response.use(
   response => response,
   error => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('username');
-      localStorage.removeItem('therapistId');
+      clearSession();
       window.location.href = '/loginpage';
     }
     return Promise.reject(error);

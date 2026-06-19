@@ -1,14 +1,8 @@
-/**
- * Clear the session and return to the login page.
- * Uses a full navigation so all in-memory state (and any webcam stream)
- * is torn down cleanly on sign-out.
- */
+import { clearSession } from './session';
+
 export function logout() {
   try {
-    localStorage.removeItem('token');
-    localStorage.removeItem('username');
-    localStorage.removeItem('therapistId');
-    localStorage.removeItem('selectedEmotion');
+    clearSession();
   } catch (_) {
     // ignore storage errors
   }

@@ -5,6 +5,7 @@ import TTSButton from "../components/TTSButton";
 import { applyEmotionTheme } from "../utils/EmotionThemeMap";
 import "./WelcomeScreen.css";
 import { API_BASE } from "../config/api";
+import { getSelectedEmotion, setSelectedEmotion } from "../utils/session";
 
 const MOODS = [
   { key: "happy",   label: "Happy",   icon: "/images/happy.png",   color: "#afe9b8", message: "Yay! You're feeling great! Keep smiling!",              emotion: "Happy"   },
@@ -32,8 +33,8 @@ export default function WelcomeScreen() {
     const storedUsername = localStorage.getItem("username") || "Guest";
     setUsername(storedUsername);
 
-    // Restore previously chosen mood and apply its background
-    const saved = localStorage.getItem("selectedEmotion");
+    // Restore previously chosen mood (only if within TTL) and apply its background
+    const saved = getSelectedEmotion();
     if (saved) {
       const found = MOODS.find(m => m.key === saved);
       if (found) {
@@ -58,7 +59,7 @@ export default function WelcomeScreen() {
   const handleMoodSelect = (mood) => {
     setSelectedMood(mood.key);
     setMessage(mood.message);
-    localStorage.setItem("selectedEmotion", mood.key);
+    setSelectedEmotion(mood.key);
     applyEmotionTheme(mood.emotion);
   };
 

@@ -7,6 +7,7 @@ import CameraConsentModal from "./components/CameraConsentModal";
 import ErrorBoundary from "./components/ErrorBoundary";
 import SpeechService from "./services/SpeechService";
 import { EmotionProvider } from "./hooks/useEmotionDetection";
+import { getToken } from "./utils/session";
 
 // Routed pages are code-split so the login screen no longer downloads every
 // game's code up front. Each chunk loads on demand behind <Suspense>.
@@ -63,6 +64,12 @@ function AccessibilityFAB() {
   );
 }
 
+/** Redirect to login if no token is present in localStorage. */
+function RequireAuth({ children }) {
+  if (!getToken()) return <Navigate to="/loginpage" replace />;
+  return children;
+}
+
 /** Routes wrapped in an error boundary that auto-resets when the path changes. */
 function AppRoutes() {
   const location = useLocation();
@@ -79,28 +86,28 @@ function AppRoutes() {
         <Routes location={location}>
           <Route path="/"                    element={<Navigate to="/loginpage" />} />
           <Route path="/loginpage"           element={<LoginPage />} />
-          <Route path="/welcomepage"         element={<WelcomeScreen />} />
-          <Route path="/games"               element={<Games />} />
-          <Route path="/wordpuzzleadventure" element={<WordPuzzleAdventure />} />
-          <Route path="/mathgame"            element={<MathGame />} />
-          <Route path="/quiz"                element={<Quiz />} />
-          <Route path="/syllabletapgame"     element={<SyllableTapGame />} />
-          <Route path="/shapememorygame"     element={<ShapeMemoryGame />} />
-          <Route path="/letterbridge"        element={<LetterBridge />} />
-          <Route path="/mirrorword"          element={<MirrorWordsGame />} />
-          <Route path="/phonemetap"          element={<PhonemeTapGame />} />
-          <Route path="/lettersound"         element={<LetterSoundGame />} />
-          <Route path="/confusableletter"    element={<ConfusableLetterGame />} />
-          <Route path="/ran"                 element={<RANGame />} />
-          <Route path="/verbalmemory"        element={<VerbalMemoryGame />} />
-          <Route path="/reading-fluency"     element={<ReadingFluency />} />
-          <Route path="/sight-words"         element={<SightWordDrill />} />
-          <Route path="/morphology-builder"  element={<MorphologyGame />} />
-          <Route path="/achievements"        element={<AchievementDashboard />} />
-          <Route path="/my-progress"         element={<MyProgress />} />
-          <Route path="/therapistdashboard"  element={<TherapistDashboard />} />
-          <Route path="/report/:childUsername" element={<ReportPage />} />
-          <Route path="/superadmin"          element={<SuperAdminDashboard />} />
+          <Route path="/welcomepage"         element={<RequireAuth><WelcomeScreen /></RequireAuth>} />
+          <Route path="/games"               element={<RequireAuth><Games /></RequireAuth>} />
+          <Route path="/wordpuzzleadventure" element={<RequireAuth><WordPuzzleAdventure /></RequireAuth>} />
+          <Route path="/mathgame"            element={<RequireAuth><MathGame /></RequireAuth>} />
+          <Route path="/quiz"                element={<RequireAuth><Quiz /></RequireAuth>} />
+          <Route path="/syllabletapgame"     element={<RequireAuth><SyllableTapGame /></RequireAuth>} />
+          <Route path="/shapememorygame"     element={<RequireAuth><ShapeMemoryGame /></RequireAuth>} />
+          <Route path="/letterbridge"        element={<RequireAuth><LetterBridge /></RequireAuth>} />
+          <Route path="/mirrorword"          element={<RequireAuth><MirrorWordsGame /></RequireAuth>} />
+          <Route path="/phonemetap"          element={<RequireAuth><PhonemeTapGame /></RequireAuth>} />
+          <Route path="/lettersound"         element={<RequireAuth><LetterSoundGame /></RequireAuth>} />
+          <Route path="/confusableletter"    element={<RequireAuth><ConfusableLetterGame /></RequireAuth>} />
+          <Route path="/ran"                 element={<RequireAuth><RANGame /></RequireAuth>} />
+          <Route path="/verbalmemory"        element={<RequireAuth><VerbalMemoryGame /></RequireAuth>} />
+          <Route path="/reading-fluency"     element={<RequireAuth><ReadingFluency /></RequireAuth>} />
+          <Route path="/sight-words"         element={<RequireAuth><SightWordDrill /></RequireAuth>} />
+          <Route path="/morphology-builder"  element={<RequireAuth><MorphologyGame /></RequireAuth>} />
+          <Route path="/achievements"        element={<RequireAuth><AchievementDashboard /></RequireAuth>} />
+          <Route path="/my-progress"         element={<RequireAuth><MyProgress /></RequireAuth>} />
+          <Route path="/therapistdashboard"  element={<RequireAuth><TherapistDashboard /></RequireAuth>} />
+          <Route path="/report/:childUsername" element={<RequireAuth><ReportPage /></RequireAuth>} />
+          <Route path="/superadmin"          element={<RequireAuth><SuperAdminDashboard /></RequireAuth>} />
           <Route path="*"                    element={
             <div style={{
               display: 'flex', flexDirection: 'column', alignItems: 'center',

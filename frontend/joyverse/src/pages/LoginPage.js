@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./LoginPage.css";
 import { useNavigate } from "react-router-dom";
 import { API_BASE } from "../config/api";
+import { getToken, getUserRole, getSelectedEmotion } from "../utils/session";
 
 function LoginPage() {
   const [username, setUsername] = useState("");
@@ -10,6 +11,20 @@ function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Skip login if a valid session already exists
+  useEffect(() => {
+    const token = getToken();
+    if (!token) return;
+    const role = getUserRole();
+    if (role === 'child') {
+      navigate(getSelectedEmotion() ? '/games' : '/welcomepage', { replace: true });
+    } else if (role === 'therapist') {
+      navigate('/therapistdashboard', { replace: true });
+    } else if (role === 'superadmin') {
+      navigate('/superadmin', { replace: true });
+    }
+  }, [navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -24,6 +39,7 @@ function LoginPage() {
       const { role, therapistId, token } = response.data;
       localStorage.setItem("username", username);
       if (token) localStorage.setItem("token", token);
+      if (role) localStorage.setItem("userRole", role);
 
       if (role === "therapist") {
         localStorage.setItem("therapistId", therapistId);
