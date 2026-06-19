@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAccessibility } from '../context/AccessibilityContext';
 import SpeechService, { TTS_VOICES } from '../services/SpeechService';
 import { getConsent, setConsent, CONSENT_EVENT } from '../utils/cameraConsent';
+import { clearBaseline } from '../utils/emotionCalibration';
 import './AccessibilitySettingsModal.css';
 
 const FONT_OPTIONS = [
@@ -32,6 +33,7 @@ export default function AccessibilitySettingsModal() {
     useAccessibility();
 
   const [cameraOn, setCameraOn] = useState(getConsent() === 'granted');
+  const [recalibrated, setRecalibrated] = useState(false);
   useEffect(() => {
     const onChange = () => setCameraOn(getConsent() === 'granted');
     window.addEventListener(CONSENT_EVENT, onChange);
@@ -185,6 +187,22 @@ export default function AccessibilitySettingsModal() {
                 </span>
               </span>
             </label>
+            {cameraOn && (
+              <button
+                type="button"
+                className="a11y-voice-preview-btn"
+                onClick={() => {
+                  let user = null;
+                  try { user = localStorage.getItem('username'); } catch (_) {}
+                  clearBaseline(user);
+                  setRecalibrated(true);
+                  setTimeout(() => setRecalibrated(false), 2500);
+                }}
+                aria-label="Recalibrate expression sensing to a neutral face"
+              >
+                {recalibrated ? '✓ Will recalibrate' : '🎯 Recalibrate to my face'}
+              </button>
+            )}
           </section>
 
           {/* Live Preview */}

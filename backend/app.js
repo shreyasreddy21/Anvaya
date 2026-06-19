@@ -32,6 +32,7 @@ import morphologyRoutes       from './Routes/morphology.js';
 import ttsRoutes              from './Routes/tts.js';
 import adaptiveRoutes         from './Routes/adaptive.js';
 import progressRoutes         from './Routes/progress.js';
+import progressSummaryRoutes  from './Routes/progressSummary.js';
 
 // ── Startup guard ────────────────────────────────────────────────────────────
 if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
@@ -173,6 +174,7 @@ app.use('/api/assigned-sessions',   assignedSessionsRoutes);
 app.use('/api/reading-progress',    readingProgressRoutes);
 app.use('/api/analytics',           analyticsRoutes);
 app.use('/api/reports',             reportsRoutes);
+app.use('/api/progress-summary',    progressSummaryRoutes);
 app.use('/api/children',            childRoutes);
 
 // Admin — auth-gated (see individual routes)

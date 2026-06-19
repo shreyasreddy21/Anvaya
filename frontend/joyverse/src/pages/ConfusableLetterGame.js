@@ -5,6 +5,7 @@ import useEmotionDetection from '../hooks/useEmotionDetection';
 import useGameSessionLogger from '../hooks/useGameSessionLogger';
 import GameShell from '../components/GameShell';
 import FeedbackGif from '../components/FeedbackGif';
+import AdaptiveDifficultyPrompt from '../components/AdaptiveDifficultyPrompt';
 import SpeechService from '../services/SpeechService';
 import axios from 'axios';
 import { API_BASE } from '../config/api';
@@ -265,6 +266,12 @@ export default function ConfusableLetterGame() {
                 </div>
               </details>
 
+              <AdaptiveDifficultyPrompt
+                gameKey="confusableletter"
+                current={difficulty}
+                enabled={gameOver}
+                onApply={(d) => { setDifficulty(d); loadQuestions(d, focusPair); }}
+              />
               <button className="clg-btn clg-btn--primary"
                 onClick={() => loadQuestions(difficulty, focusPair)}>
                 Play Again

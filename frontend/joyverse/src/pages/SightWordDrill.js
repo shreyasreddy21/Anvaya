@@ -6,7 +6,7 @@ import SpeechService from '../services/SpeechService';
 import TTSButton from '../components/TTSButton';
 import { API_BASE } from '../config/api';
 import axios from 'axios';
-import confetti from 'canvas-confetti';
+import useFeedbackEffect from '../hooks/useFeedbackEffect';
 import './SightWordDrill.css';
 
 const DOLCH_WORDS = {
@@ -44,6 +44,7 @@ function pickWords(level) {
 
 export default function SightWordDrill() {
   const { emotion, confidence, videoRef, canvasRef } = useEmotionDetection();
+  const triggerFeedback = useFeedbackEffect();
   const username = localStorage.getItem('username');
 
   const [phase, setPhase] = useState('setup'); // setup | drill | done
@@ -76,6 +77,7 @@ export default function SightWordDrill() {
   const handleResponse = useCallback((quality) => {
     const word = wordQueue[currentIdx];
     const correct = quality >= 4;
+    triggerFeedback(correct ? 'correct' : 'wrong');
     const result = { word, quality, correct };
 
     // Fire-and-forget to backend

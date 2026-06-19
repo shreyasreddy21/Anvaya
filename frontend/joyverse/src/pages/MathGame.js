@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import confetti from "canvas-confetti";
+import useFeedbackEffect from '../hooks/useFeedbackEffect';
 import useEmotionDetection from "../hooks/useEmotionDetection";
 import useGameSessionLogger from "../hooks/useGameSessionLogger";
 import TTSButton from "../components/TTSButton";
@@ -23,6 +23,7 @@ const MathGame = () => {
     videoRef,
     canvasRef,
   } = useEmotionDetection();
+  const triggerFeedback = useFeedbackEffect();
 
   const [num1, setNum1] = useState(0);
   const [num2, setNum2] = useState(0);
@@ -112,9 +113,11 @@ const MathGame = () => {
     }
 
     if (answer === correctAnswer) {
+      triggerFeedback('correct');
       setScore(score + 1);
       setMessage("✅ Correct! Well done.");
     } else {
+      triggerFeedback('wrong');
       setMessage(`❌ Wrong! The answer was ${correctAnswer}`);
     }
 

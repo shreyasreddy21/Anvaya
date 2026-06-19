@@ -46,6 +46,20 @@ test('never recommends below easy even when struggling', () => {
   assert.equal(r.shouldPrompt, false);
 });
 
+test('frustration-only: eases down even without accuracy history (all-games path)', () => {
+  // Games that log emotion but no per-game accuracy score still get protected.
+  const r = recommendDifficulty({ recentAccuracies: [], frustrationScore: 0.7, currentDifficulty: 'medium' });
+  assert.equal(r.reason, 'frustration');
+  assert.equal(r.recommended, 'easy');
+  assert.equal(r.shouldPrompt, true);
+});
+
+test('no affect + no accuracy = not_enough_data (unchanged)', () => {
+  const r = recommendDifficulty({ recentAccuracies: [], frustrationScore: 0, currentDifficulty: 'medium' });
+  assert.equal(r.reason, 'not_enough_data');
+  assert.equal(r.shouldPrompt, false);
+});
+
 test('frustrationFromExpressions counts angry/sad proportionally', () => {
   assert.equal(frustrationFromExpressions([]), 0);
   assert.equal(frustrationFromExpressions(['happy', 'neutral']), 0);

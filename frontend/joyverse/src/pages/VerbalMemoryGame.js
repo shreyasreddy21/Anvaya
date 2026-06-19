@@ -6,6 +6,7 @@ import useGameSessionLogger from '../hooks/useGameSessionLogger';
 import SpeechService from '../services/SpeechService';
 import GameShell from '../components/GameShell';
 import FeedbackGif from '../components/FeedbackGif';
+import AdaptiveDifficultyPrompt from '../components/AdaptiveDifficultyPrompt';
 import axios from 'axios';
 
 import { API_BASE } from '../config/api';
@@ -500,6 +501,18 @@ export default function VerbalMemoryGame() {
             </div>
           </details>
 
+          <AdaptiveDifficultyPrompt
+            gameKey="verbalmemory"
+            current={difficulty}
+            enabled={gamePhase === 'done'}
+            onApply={(d) => {
+              setDifficulty(d);
+              setGamePhase('setup');
+              setRounds([]);
+              roundsRef.current = [];
+              setScore(0);
+            }}
+          />
           <button className="vsm-btn vsm-btn--start"
             onClick={() => {
               setGamePhase('setup');

@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { FaceMesh } from "@mediapipe/face_mesh";
-import { Camera } from "@mediapipe/camera_utils";
+// NOTE: intentionally NOT using @mediapipe/camera_utils. Its UMD `Camera` export
+// can resolve to undefined in a production bundle ("Camera is not a constructor").
+// We drive the video with native getUserMedia + requestAnimationFrame instead.
 
 export default function FaceMeshDemo() {
   const videoRef = useRef(null);
@@ -63,7 +65,13 @@ export default function FaceMeshDemo() {
       const normalized = flatPoints.map(val => val / maxAbs);
 
       try {
-        const res = await fetch("http://localhost:5000/predict", {
+        // Configurable, defaults to SAME-ORIGIN '/predict'. The old hardcoded
+        // http://localhost:5000 was mixed content on an HTTPS page (blocked by
+        // the browser) and pointed at the visitor's own machine. The video keeps
+        // rendering regardless of whether the prediction backend is reachable.
+        const PREDICT_URL =
+          (process.env.REACT_APP_PREDICT_URL || "").replace(/\/$/, "") + "/predict";
+        const res = await fetch(PREDICT_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ landmarks: normalized }),
@@ -77,14 +85,52 @@ export default function FaceMeshDemo() {
   }
 });
 
-    const camera = new Camera(video, {
-      onFrame: async () => {
-        await faceMesh.send({ image: video });
-      },
-      width: 640,
-      height: 480,
-    });
-    camera.start();
+    // getUserMedia requires a secure context (HTTPS or localhost). Surface the
+    // reason instead of failing silently when served over plain HTTP.
+    if (!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia !== "function") {
+      setEmotion(
+        window.isSecureContext === false
+          ? "Camera needs a secure (https://) connection."
+          : "This browser does not support camera access."
+      );
+      return;
+    }
+
+    let stream = null;
+    let rafId = 0;
+    let stopped = false;
+
+    navigator.mediaDevices
+      .getUserMedia({ video: { width: 640, height: 480, facingMode: "user" }, audio: false })
+      .then(async (s) => {
+        if (stopped) { s.getTracks().forEach((t) => t.stop()); return; }
+        stream = s;
+        video.srcObject = s;
+        try { await video.play(); } catch (_) {}
+        const tick = async () => {
+          if (stopped) return;
+          if (video.readyState >= 2) {
+            try { await faceMesh.send({ image: video }); } catch (_) {}
+          }
+          rafId = requestAnimationFrame(tick);
+        };
+        rafId = requestAnimationFrame(tick);
+      })
+      .catch((err) => {
+        console.error("Camera start failed:", err);
+        setEmotion(
+          err && (err.name === "NotAllowedError" || err.name === "SecurityError")
+            ? "Camera access was blocked — allow it in your browser and reload."
+            : "The camera could not be started."
+        );
+      });
+
+    return () => {
+      stopped = true;
+      if (rafId) cancelAnimationFrame(rafId);
+      try { if (stream) stream.getTracks().forEach((t) => t.stop()); } catch (_) {}
+      try { video.srcObject = null; } catch (_) {}
+    };
   }, []);
 
   return (

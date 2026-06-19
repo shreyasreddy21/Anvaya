@@ -40,15 +40,21 @@ export function recommendDifficulty({
     frustrationScore: Math.round(frustration * 100) / 100,
   };
 
-  // Not enough evidence — never nudge a child on one data point.
+  // Frustration protection runs on affect evidence alone — no accuracy history
+  // required — so it works for EVERY game, including ones that only log emotion
+  // (not a per-game accuracy score). Highest priority: protect the child from a
+  // level that is upsetting them. (When there is no affect evidence the score is
+  // 0, so this never fires spuriously.)
+  if (frustration >= 0.5 && idx > 0) {
+    return { ...base, recommended: DIFFICULTY_LADDER[idx - 1], reason: 'frustration', shouldPrompt: true };
+  }
+
+  // Accuracy-based decisions (struggling / mastery) need a minimum number of
+  // scored sessions — never nudge a child on one data point.
   if (recentAccuracies.length < minSessions) {
     return { ...base, reason: 'not_enough_data', shouldPrompt: false };
   }
 
-  // Struggling or frustrated → ease off (highest priority: protect the child).
-  if (frustration >= 0.5 && idx > 0) {
-    return { ...base, recommended: DIFFICULTY_LADDER[idx - 1], reason: 'frustration', shouldPrompt: true };
-  }
   if (avgAccuracy <= 50 && idx > 0) {
     return { ...base, recommended: DIFFICULTY_LADDER[idx - 1], reason: 'struggling', shouldPrompt: true };
   }

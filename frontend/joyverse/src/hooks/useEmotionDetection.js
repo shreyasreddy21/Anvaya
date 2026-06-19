@@ -3,11 +3,16 @@ import {
   createContext, useContext,
 } from "react";
 import { useLocation } from "react-router-dom";
-import { Camera } from "@mediapipe/camera_utils";
 import { applyEmotionTheme } from "../utils/EmotionThemeMap";
 import { classifyEmotion, EMOTION_CLASSES } from "../utils/GeometricEmotion";
 import { classifyFromBlendshapes } from "../utils/BlendshapeEmotion";
 import { getConsent, CONSENT_EVENT } from "../utils/cameraConsent";
+import { cameraUnavailableReason, describeCameraIssue, startCameraPump } from "../utils/cameraSupport";
+import { getBaseline, saveBaseline, createBaselineCollector, applyBaseline } from "../utils/emotionCalibration";
+
+// A face smaller than this fraction of the frame height yields unreliable
+// landmarks/blendshapes — skip those frames rather than feed the classifier noise.
+const MIN_FACE_RATIO = 0.16;
 
 // MediaPipe Face Landmarker assets (loaded on-device; only model files come
 // from the CDN — no user data is ever sent). Pinned to the installed version.
@@ -41,9 +46,9 @@ const NUM_CLASSES = EMOTION_CLASSES.length;
 function useEmotionDetectionInternal({
   active        = true,
   intervalTime  = 400,
-  confThreshold = 0.42,
-  holdFrames    = 1,
-  emaAlpha      = 0.45,
+  confThreshold = 0.38,  // slightly more sensitive: children's expressions sit between classes
+  holdFrames    = 2,     // require 2 consecutive frames so blinks/yawns don't flip the label
+  emaAlpha      = 0.5,   // a touch more responsive to genuine changes
 } = {}) {
   const [emotion,                setEmotion]            = useState("Neutral");
   const [confidence,             setConfidence]         = useState(0);
@@ -72,9 +77,23 @@ function useEmotionDetectionInternal({
     const video = videoRef.current;
     if (!video) return;
 
-    let camera = null;
+    // Hard requirement: getUserMedia needs a secure context. Bail early with a
+    // precise reason instead of letting the camera fail silently in prod.
+    const blockReason = cameraUnavailableReason();
+    if (blockReason) {
+      console.warn('[emotion] camera unavailable —', describeCameraIssue(blockReason));
+      return;
+    }
+
+    let pump = null;
     let landmarker = null;
     let cancelled = false;
+
+    // Per-child calibration: load this child's stored neutral baseline; if none
+    // exists yet, collect one from the first calm frames of this session.
+    const calibUser  = (() => { try { return localStorage.getItem('username'); } catch { return null; } })();
+    let baseline     = getBaseline(calibUser);
+    let collector    = baseline ? null : createBaselineCollector();
 
     // Shared post-classification pipeline (EMA → hysteresis → state).
     // Unchanged from the previous implementation — only the source of the
@@ -112,53 +131,90 @@ function useEmotionDetectionInternal({
       }
     };
 
+    // Start the camera FIRST so the browser permission prompt fires as soon as
+    // consent is granted. The onFrame callback no-ops until the model is ready,
+    // so model loading (below) is fully decoupled — a slow or failed model load
+    // can never prevent the camera from turning on. Uses startCameraPump (native
+    // getUserMedia + rAF) rather than @mediapipe/camera_utils, whose UMD `Camera`
+    // export is undefined in the production bundle ("Camera is not a constructor").
+    startCameraPump(video, {
+      width:  640,
+      height: 480,
+      onFrame: async () => {
+        if (!landmarker || cancelled || video.readyState < 2) return;
+        const now = Date.now();
+        if (now - lastPredictionTime.current < intervalTime) return;
+        lastPredictionTime.current = now;
+
+        let results;
+        try { results = landmarker.detectForVideo(video, performance.now()); }
+        catch (_) { return; }
+
+        const landmarks = results?.faceLandmarks?.[0];
+
+        // Frame-quality gate: if the face is too small (child far from camera)
+        // the landmarks/blendshapes are unreliable — skip rather than misclassify.
+        if (landmarks && landmarks[10] && landmarks[152]) {
+          const faceRatio = Math.abs(landmarks[152].y - landmarks[10].y);
+          if (faceRatio < MIN_FACE_RATIO) return;
+        }
+
+        const categories = results?.faceBlendshapes?.[0]?.categories;
+        let result = null;
+        if (categories && categories.length) {
+          // While calibrating, fold this frame into the neutral baseline.
+          if (collector) {
+            const stillCollecting = collector.add(categories);
+            if (!stillCollecting) {
+              baseline = collector.finalize();
+              saveBaseline(calibUser, baseline);
+              collector = null;
+            }
+          }
+          // Classify deviations from THIS child's resting face (no-op until a
+          // baseline exists, so detection still works during calibration).
+          result = classifyFromBlendshapes(applyBaseline(categories, baseline));
+        } else if (landmarks) {
+          // Fallback to the proven geometric classifier if no blendshapes.
+          result = classifyEmotion(landmarks, 640, 480);
+        }
+        ingest(result);
+      },
+    })
+      .then((handle) => {
+        // If the effect already cleaned up while getUserMedia was pending,
+        // immediately release the stream we just acquired.
+        if (cancelled) handle.stop();
+        else pump = handle;
+      })
+      .catch((err) => {
+        // Permission denied / insecure context / no device. Surfaced, not silent.
+        console.warn('[emotion] camera start failed —', describeCameraIssue(err), err);
+      });
+
+    // Load the on-device vision model in parallel. Only the model files come
+    // from the CDN — no user data is sent. A failure here degrades emotion
+    // sensing to off, but leaves the camera running.
     (async () => {
       try {
-        // Loaded on demand (only after consent activates the camera), keeping
-        // the vision runtime out of the initial bundle.
         const { FaceLandmarker, FilesetResolver } = await import('@mediapipe/tasks-vision');
         const fileset = await FilesetResolver.forVisionTasks(MP_WASM);
-        landmarker = await FaceLandmarker.createFromOptions(fileset, {
+        const lm = await FaceLandmarker.createFromOptions(fileset, {
           baseOptions: { modelAssetPath: MP_MODEL, delegate: 'CPU' },
           outputFaceBlendshapes: true,
           runningMode: 'VIDEO',
           numFaces: 1,
         });
-        if (cancelled) { try { landmarker.close(); } catch (_) {} return; }
-
-        camera = new Camera(video, {
-          onFrame: async () => {
-            if (!landmarker || cancelled || video.readyState < 2) return;
-            const now = Date.now();
-            if (now - lastPredictionTime.current < intervalTime) return;
-            lastPredictionTime.current = now;
-
-            let results;
-            try { results = landmarker.detectForVideo(video, performance.now()); }
-            catch (_) { return; }
-
-            const categories = results?.faceBlendshapes?.[0]?.categories;
-            let result = null;
-            if (categories && categories.length) {
-              result = classifyFromBlendshapes(categories);
-            } else if (results?.faceLandmarks?.[0]) {
-              // Fallback to the proven geometric classifier if no blendshapes.
-              result = classifyEmotion(results.faceLandmarks[0], 640, 480);
-            }
-            ingest(result);
-          },
-          width:  640,
-          height: 480,
-        });
-        camera.start().catch(() => { /* camera unavailable — degrade silently */ });
-      } catch (_) {
-        // tasks-vision / model failed to load — emotion sensing degrades silently
+        if (cancelled) { try { lm.close(); } catch (_) {} return; }
+        landmarker = lm;
+      } catch (err) {
+        console.warn('[emotion] vision model failed to load:', err);
       }
     })();
 
     return () => {
       cancelled = true;
-      try { camera?.stop(); } catch (_) {}
+      try { pump?.stop(); } catch (_) {}
       try { landmarker?.close(); } catch (_) {}
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

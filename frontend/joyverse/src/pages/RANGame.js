@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import confetti from 'canvas-confetti';
+import useFeedbackEffect from '../hooks/useFeedbackEffect';
 import './RANGame.css';
 import useEmotionDetection from '../hooks/useEmotionDetection';
 import useGameSessionLogger from '../hooks/useGameSessionLogger';
 import GameShell from '../components/GameShell';
+import AdaptiveDifficultyPrompt from '../components/AdaptiveDifficultyPrompt';
 import SpeechService from '../services/SpeechService';
 import axios from 'axios';
 import { API_BASE } from '../config/api';
@@ -63,6 +64,7 @@ function getOptions(correct, pool) {
 
 export default function RANGame() {
   const { emotion, confidence, videoRef, canvasRef } = useEmotionDetection();
+  const triggerFeedback = useFeedbackEffect();
 
   const [category,   setCategory]   = useState('letters');
   const [difficulty, setDifficulty] = useState('easy');
@@ -125,6 +127,7 @@ export default function RANGame() {
 
     setItems(newItems);
     if (correct) setScore(s => s + 10);
+    triggerFeedback(correct ? 'correct' : 'wrong');
     setFlash(correct ? 'correct' : 'wrong');
 
     // Per-question feedback message. On a miss we also say the answer aloud to
@@ -306,6 +309,12 @@ export default function RANGame() {
                 </div>
               </details>
 
+              <AdaptiveDifficultyPrompt
+                gameKey="ran"
+                current={difficulty}
+                enabled={gameState === 'done'}
+                onApply={(d) => { setDifficulty(d); startRound(category, d); }}
+              />
               <div className="ran-replay-row">
                 <button className="ran-btn ran-btn--primary"
                   onClick={() => startRound(category, difficulty)}>
