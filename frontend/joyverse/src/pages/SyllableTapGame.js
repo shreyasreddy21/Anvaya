@@ -6,11 +6,8 @@ import useGameSessionLogger from "../hooks/useGameSessionLogger";
 import TTSButton from "../components/TTSButton";
 import GameShell from "../components/GameShell";
 import FeedbackGif from "../components/FeedbackGif";
-<<<<<<< HEAD
 import useFeedbackEffect from '../hooks/useFeedbackEffect';
-=======
 import AdaptiveDifficultyPrompt from "../components/AdaptiveDifficultyPrompt";
->>>>>>> 5ad4f05eeb009011a3d566ae60759d65345ccf82
 import { API_BASE } from '../config/api';
 // const hardcodedWords = {
 //   easy: [
