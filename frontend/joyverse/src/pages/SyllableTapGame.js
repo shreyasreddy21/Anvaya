@@ -128,10 +128,6 @@ const handleDifficultyChange = (e) => {
     fetchWords(difficulty);
   };
 
-
-  useEffect(() => {
-    fetchWords(difficulty);
-  }, []);
   const getEmotionStyles = (emotion) => {
   switch (emotion) {
     case "Happy":
@@ -182,18 +178,12 @@ const handleDifficultyChange = (e) => {
     <div className="game-content">
       {currentWord ? (
         <>
-          <div className="tts-inline" style={{ justifyContent: "center" }}>
+          <div style={{ position: 'relative', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <p className="current-word" style={{ margin: 0 }}>{currentWord.word}</p>
-            <TTSButton text={currentWord.word} size="md" label="Say the word aloud" />
-          </div>
-
-          {isFirstWord && (
-            <div className="syllable-split">
-              {currentWord.split.map((syllable, idx) => (
-                <span key={idx} className="syllable">{syllable}</span>
-              ))}
+            <div style={{ position: 'absolute', right: 0 }}>
+              <TTSButton text={currentWord.word} size="md" label="Say the word aloud" />
             </div>
-          )}
+          </div>
 
           <p className="tap-count">Taps: {taps}</p>
           <div>

@@ -1,8 +1,12 @@
 // Session TTL matches the backend JWT_EXPIRES_IN default (8h).
 const EMOTION_TTL_MS = 8 * 60 * 60 * 1000;
 
-export function getToken() {
-  return localStorage.getItem('token');
+// The JWT lives in an HttpOnly cookie — JS cannot read it.
+// We use userRole in localStorage as a lightweight client-side session signal.
+// If the cookie is expired/absent, the first authenticated API call returns 401
+// and the interceptor in index.js clears localStorage + redirects to login.
+export function isSessionActive() {
+  return !!localStorage.getItem('userRole');
 }
 
 export function getUserRole() {

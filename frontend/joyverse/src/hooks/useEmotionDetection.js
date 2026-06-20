@@ -273,7 +273,7 @@ const CAMERA_PATHS = new Set([
 export function EmotionProvider({ children }) {
   const location = useLocation();
   let hasToken = false;
-  try { hasToken = !!localStorage.getItem('token'); } catch (_) {}
+  try { hasToken = !!localStorage.getItem('userRole'); } catch (_) {}
 
   // Expression sensing is opt-in: the camera only runs after explicit consent.
   const [consent, setConsentState] = useState(getConsent());

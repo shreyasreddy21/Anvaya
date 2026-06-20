@@ -32,7 +32,7 @@ export default function CameraConsentModal() {
   }, []);
 
   let hasToken = false;
-  try { hasToken = !!localStorage.getItem('token'); } catch (_) {}
+  try { hasToken = !!localStorage.getItem('userRole'); } catch (_) {}
 
   const shouldAsk = hasToken && choice == null && GAME_PATHS.has(location.pathname);
   if (!shouldAsk) return null;

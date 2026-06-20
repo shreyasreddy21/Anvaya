@@ -3,7 +3,7 @@ import axios from "axios";
 import "./LoginPage.css";
 import { useNavigate } from "react-router-dom";
 import { API_BASE } from "../config/api";
-import { getToken, getUserRole, getSelectedEmotion } from "../utils/session";
+import { clearSession } from "../utils/session";
 
 function LoginPage() {
   const [username, setUsername] = useState("");
@@ -12,19 +12,13 @@ function LoginPage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Skip login if a valid session already exists
+  // Clear any stale localStorage from a previous or expired session.
+  // We can't read the HttpOnly cookie from JS, so keeping old userRole around
+  // would make isSessionActive() return true when the cookie is already gone —
+  // causing an instant redirect loop after the first 401.
   useEffect(() => {
-    const token = getToken();
-    if (!token) return;
-    const role = getUserRole();
-    if (role === 'child') {
-      navigate(getSelectedEmotion() ? '/games' : '/welcomepage', { replace: true });
-    } else if (role === 'therapist') {
-      navigate('/therapistdashboard', { replace: true });
-    } else if (role === 'superadmin') {
-      navigate('/superadmin', { replace: true });
-    }
-  }, [navigate]);
+    clearSession();
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -37,8 +31,8 @@ function LoginPage() {
       });
 
       const { role, therapistId, token } = response.data;
-      localStorage.setItem("username", username);
       if (token) localStorage.setItem("token", token);
+      localStorage.setItem("username", username.trim().toLowerCase());
       if (role) localStorage.setItem("userRole", role);
 
       if (role === "therapist") {

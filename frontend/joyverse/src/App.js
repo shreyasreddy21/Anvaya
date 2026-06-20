@@ -7,7 +7,7 @@ import CameraConsentModal from "./components/CameraConsentModal";
 import ErrorBoundary from "./components/ErrorBoundary";
 import SpeechService from "./services/SpeechService";
 import { EmotionProvider } from "./hooks/useEmotionDetection";
-import { getToken } from "./utils/session";
+import { isSessionActive } from "./utils/session";
 
 // Routed pages are code-split so the login screen no longer downloads every
 // game's code up front. Each chunk loads on demand behind <Suspense>.
@@ -64,9 +64,9 @@ function AccessibilityFAB() {
   );
 }
 
-/** Redirect to login if no token is present in localStorage. */
+/** Redirect to login if no active session (inferred from userRole in localStorage). */
 function RequireAuth({ children }) {
-  if (!getToken()) return <Navigate to="/loginpage" replace />;
+  if (!isSessionActive()) return <Navigate to="/loginpage" replace />;
   return children;
 }
 

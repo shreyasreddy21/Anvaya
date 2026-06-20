@@ -1,7 +1,8 @@
 import { useCallback, useRef } from 'react';
 import confetti from 'canvas-confetti';
 
-// Shared canvas so multiple rapid calls don't stack canvases in the DOM.
+// ── Confetti singleton ────────────────────────────────────────────────────────
+// One canvas shared across all game components so rapid calls don't stack up.
 let _canvas = null;
 let _confetti = null;
 
@@ -18,18 +19,26 @@ function getConfettiInstance() {
   return _confetti;
 }
 
-// Precompute the ❌ emoji as a confetti shape once.
-const WRONG_SHAPE = confetti.shapeFromText({ text: '❌', scalar: 2 });
+// ── Amber overlay singleton ───────────────────────────────────────────────────
+// One div shared across all game components. The CSS animation is re-triggered
+// by removing the class, forcing a reflow, then re-adding it.
+let _overlay = null;
+
+function getOverlay() {
+  if (_overlay) return _overlay;
+  _overlay = document.createElement('div');
+  _overlay.id = 'jv-wrong-overlay';
+  document.body.appendChild(_overlay);
+  return _overlay;
+}
 
 /**
- * useFeedbackEffect — fires a canvas-confetti burst on correct/wrong answers.
+ * useFeedbackEffect — non-alarming answer feedback for dyslexic children.
  *
- * Usage:
- *   const triggerFeedback = useFeedbackEffect();
- *   triggerFeedback('correct');   // rainbow confetti burst
- *   triggerFeedback('wrong');     // falling ❌ particles
+ * triggerFeedback('correct') → rainbow confetti burst (three cannons)
+ * triggerFeedback('wrong')   → warm amber screen-edge pulse (not alarming)
  *
- * Respects prefers-reduced-motion by skipping the animation silently.
+ * Respects prefers-reduced-motion by skipping animations silently.
  */
 export default function useFeedbackEffect() {
   const reduceMotion = useRef(
@@ -39,12 +48,9 @@ export default function useFeedbackEffect() {
 
   const trigger = useCallback((result) => {
     if (reduceMotion.current) return;
-    if (result !== 'correct' && result !== 'wrong') return;
-
-    const fire = getConfettiInstance();
 
     if (result === 'correct') {
-      // Three-cannon burst: left, right, and center top — fills the whole screen.
+      const fire = getConfettiInstance();
       fire({
         particleCount: 120,
         angle: 60,
@@ -78,31 +84,12 @@ export default function useFeedbackEffect() {
         ticks: 260,
         startVelocity: 65,
       });
-    } else {
-      // Staggered rain — 6 waves fired 90ms apart so Xs appear at different
-      // vertical positions, like actual raindrops rather than one simultaneous burst.
-      const xs = [0.05, 0.15, 0.27, 0.38, 0.5, 0.62, 0.73, 0.85, 0.95];
-      const WAVES = 6;
-      for (let wave = 0; wave < WAVES; wave++) {
-        setTimeout(() => {
-          // Each wave picks a random subset of columns so no two waves look identical.
-          xs.filter(() => Math.random() > 0.45).forEach(x => {
-            fire({
-              particleCount: 1,
-              angle: 270,
-              spread: 8,
-              origin: { x, y: 0 },
-              shapes: [WRONG_SHAPE],
-              scalar: 2.6,
-              gravity: 1.6,
-              startVelocity: 12 + Math.random() * 6,
-              drift: (Math.random() - 0.5) * 0.4,
-              ticks: 240,
-              colors: ['#ff2d2d'],
-            });
-          });
-        }, wave * 90);
-      }
+    } else if (result === 'wrong') {
+      const overlay = getOverlay();
+      // Reset the animation so it replays even if triggered in quick succession.
+      overlay.classList.remove('jv-wrong-active');
+      void overlay.offsetWidth; // force reflow
+      overlay.classList.add('jv-wrong-active');
     }
   }, []);
 

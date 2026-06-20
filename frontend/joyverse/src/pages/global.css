@@ -413,3 +413,23 @@ html[data-emotion="Surprise"], html[data-emotion="Happy"] { --ui-motion-scale: 1
   }
   #jv-bg-a, #jv-bg-b { transition: none !important; }
 }
+
+/* ── Wrong-answer amber pulse overlay ───────────────────────────────────────
+   A warm radial glow at the screen edges — non-alarming for dyslexic children.
+   Injected once into <body> by useFeedbackEffect and re-triggered via class. */
+#jv-wrong-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  opacity: 0;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(251, 146, 60, 0.45) 100%);
+}
+#jv-wrong-overlay.jv-wrong-active {
+  animation: jv-wrong-pulse 650ms ease-out forwards;
+}
+@keyframes jv-wrong-pulse {
+  0%   { opacity: 0; }
+  18%  { opacity: 1; }
+  100% { opacity: 0; }
+}

@@ -1,12 +1,14 @@
+import axios from 'axios';
 import { clearSession } from './session';
+import { API_BASE } from '../config/api';
 
 export function logout() {
-  try {
+  // Ask the server to clear the HttpOnly jv_token cookie, then wipe localStorage.
+  // If the request fails (e.g. offline), we still clear local state and redirect.
+  axios.post(`${API_BASE}/api/auth/logout`).catch(() => {}).finally(() => {
     clearSession();
-  } catch (_) {
-    // ignore storage errors
-  }
-  window.location.href = '/loginpage';
+    window.location.href = '/loginpage';
+  });
 }
 
 export default logout;
