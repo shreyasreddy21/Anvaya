@@ -3,7 +3,7 @@ import axios from "axios";
 import "./LoginPage.css";
 import { useNavigate } from "react-router-dom";
 import { API_BASE } from "../config/api";
-import { clearSession } from "../utils/session";
+import { clearSession, isSessionActive, getUserRole } from "../utils/session";
 
 function LoginPage() {
   const [username, setUsername] = useState("");
@@ -12,13 +12,16 @@ function LoginPage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Clear any stale localStorage from a previous or expired session.
-  // We can't read the HttpOnly cookie from JS, so keeping old userRole around
-  // would make isSessionActive() return true when the cookie is already gone —
-  // causing an instant redirect loop after the first 401.
   useEffect(() => {
-    clearSession();
-  }, []);
+    if (isSessionActive()) {
+      const role = getUserRole();
+      if (role === 'child') navigate('/games', { replace: true });
+      else if (role === 'therapist') navigate('/therapistdashboard', { replace: true });
+      else if (role === 'superadmin') navigate('/superadmin', { replace: true });
+    } else {
+      clearSession();
+    }
+  }, [navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
