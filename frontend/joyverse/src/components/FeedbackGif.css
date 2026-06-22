@@ -19,7 +19,7 @@
 /* The pedestal the buddy sits on — frosted and bordered with the active
    emotion's card colour so it belongs to the current theme. */
 .buddy__stage {
-  width: clamp(304px, 52vw, 512px);
+  width: clamp(152px, 26vw, 256px);
   aspect-ratio: 1 / 1;
   display: grid;
   place-items: center;
